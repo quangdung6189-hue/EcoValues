@@ -84,9 +84,20 @@ export default function Profile() {
   // Rank Progress Roadmap Modal
   const [showRankModal, setShowRankModal] = useState(false);
 
-  // Daily Check-in state
-  const [hasCheckedInToday, setHasCheckedInToday] = useState(false);
-  const [checkInStreak, setCheckInStreak] = useState(4);
+  // Daily Check-in state persisted per user per date
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const checkInKey = user ? `ecovalues_checkin_${user.email}_${todayStr}` : "";
+
+  const [hasCheckedInToday, setHasCheckedInToday] = useState<boolean>(() => {
+    return checkInKey ? localStorage.getItem(checkInKey) === "true" : false;
+  });
+  const [checkInStreak, setCheckInStreak] = useState(1);
+
+  useEffect(() => {
+    if (checkInKey) {
+      setHasCheckedInToday(localStorage.getItem(checkInKey) === "true");
+    }
+  }, [checkInKey]);
 
   // Active sub-tab
   const [activeTab, setActiveTab] = useState<"wallet" | "vouchers" | "privileges" | "security">("wallet");
@@ -172,7 +183,7 @@ export default function Profile() {
     });
   };
 
-  // Daily Check-in Action
+  // Daily Check-in Action (Strictly once per day per user account!)
   const handleDailyCheckIn = () => {
     if (hasCheckedInToday) {
       toast({
@@ -181,12 +192,33 @@ export default function Profile() {
       });
       return;
     }
+
+    if (checkInKey) {
+      localStorage.setItem(checkInKey, "true");
+    }
     setHasCheckedInToday(true);
     setCheckInStreak(prev => prev + 1);
-    updatePoints(currentUser.points + 50);
+    
+    const newPoints = currentUser.points + 50;
+    updatePoints(newPoints);
+
+    // Save transaction to user's private history
+    const newTxItem = {
+      id: Date.now(),
+      type: "plus",
+      title: "Điểm danh hàng ngày",
+      date: "Hôm nay, " + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      points: "+50 pt"
+    };
+    const updatedTx = [newTxItem, ...pointTransactions];
+    setPointTransactions(updatedTx);
+    if (txKey) {
+      localStorage.setItem(txKey, JSON.stringify(updatedTx));
+    }
+
     toast({
       title: "Điểm Danh Thành Công! 🎉",
-      description: "Bạn vừa nhận +50 điểm xanh hôm nay. Chuỗi điểm danh: 5 ngày liên tiếp 🔥",
+      description: "Bạn vừa nhận +50 điểm xanh hôm nay. Đã ghi nhận thưởng vào ví!",
     });
   };
 
@@ -219,20 +251,55 @@ export default function Profile() {
     });
   };
 
-  // Saved Vouchers List
-  const myVouchers = [
-    { id: 1, title: "Voucher Căng tin CMC 50.000đ", code: "ECO-CMC-8832", expiry: "30/08/2026", points: 300, icon: Gift },
-    { id: 2, title: "Bình Giữ Nhiệt EcoValues Stainless", code: "ECO-CMC-1092", expiry: "15/09/2026", points: 500, icon: Sparkles },
-    { id: 3, title: "Voucher Highlands Coffee 30.000đ", code: "ECO-CMC-5541", expiry: "20/08/2026", points: 250, icon: Ticket }
-  ];
+  // Per-user Point Transactions History
+  const txKey = currentUser ? `ecovalues_tx_${currentUser.email}` : "";
+  const [pointTransactions, setPointTransactions] = useState<any[]>(() => {
+    if (!txKey) return [];
+    const saved = localStorage.getItem(txKey);
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) {}
+    }
+    return [
+      { id: 1, type: "plus", title: "Thưởng thành viên mới (Hạng Đồng)", date: "Hôm nay", points: "+100 pt" }
+    ];
+  });
 
-  // Point Transactions History
-  const pointTransactions = [
-    { id: 1, type: "plus", title: "Điểm danh hàng ngày", date: "Hôm nay, 08:30", points: "+50 pt" },
-    { id: 2, type: "plus", title: "Thu gom 5 Chai nhựa PET", date: "28/07/2026", points: "+250 pt" },
-    { id: 3, type: "minus", title: "Đổi Voucher Căng tin CMC 50k", date: "25/07/2026", points: "-300 pt" },
-    { id: 4, type: "plus", title: "Thưởng chuỗi 7 ngày xanh", date: "20/07/2026", points: "+150 pt" },
-  ];
+  useEffect(() => {
+    if (txKey) {
+      const saved = localStorage.getItem(txKey);
+      if (saved) {
+        try { setPointTransactions(JSON.parse(saved)); } catch (e) {}
+      } else {
+        const initialTx = [
+          { id: 1, type: "plus", title: "Thưởng thành viên mới (Hạng Đồng)", date: "Hôm nay", points: "+100 pt" }
+        ];
+        setPointTransactions(initialTx);
+        localStorage.setItem(txKey, JSON.stringify(initialTx));
+      }
+    }
+  }, [txKey]);
+
+  // Per-user Saved Vouchers List (Empty by default for new accounts!)
+  const voucherKey = currentUser ? `ecovalues_vouchers_${currentUser.email}` : "";
+  const [myVouchers, setMyVouchers] = useState<any[]>(() => {
+    if (!voucherKey) return [];
+    const saved = localStorage.getItem(voucherKey);
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) {}
+    }
+    return [];
+  });
+
+  useEffect(() => {
+    if (voucherKey) {
+      const saved = localStorage.getItem(voucherKey);
+      if (saved) {
+        try { setMyVouchers(JSON.parse(saved)); } catch (e) {}
+      } else {
+        setMyVouchers([]);
+      }
+    }
+  }, [voucherKey]);
 
   // Membership Tiers Roadmap Data
   const TIERS = [
@@ -258,7 +325,6 @@ export default function Profile() {
       maxPoints: 1499,
       icon: "🥇",
       color: "from-amber-400 to-yellow-600",
-      isCurrent: true,
       perks: ["Tích điểm +20%", "Nhận Giấy chứng nhận Tình nguyện viên", "Đổi bình nước tre Eco cao cấp"]
     },
     {
@@ -267,7 +333,6 @@ export default function Profile() {
       maxPoints: 2999,
       icon: "💎",
       color: "from-cyan-400 to-emerald-600",
-      isNext: true,
       perks: ["X2 Điểm thưởng thu gom", "Miễn phí ship quà tặng tận nơi", "Thiệp & quà sinh nhật Đại sứ"]
     },
     {
@@ -854,73 +919,121 @@ export default function Profile() {
                   <button onClick={() => setShowRankModal(false)} className="text-xs font-bold text-muted-foreground hover:text-foreground">Đóng ✖</button>
                 </div>
 
-                {/* Current User Rank Status Banner */}
-                <div className="p-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl space-y-3 shadow-md">
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold uppercase tracking-wider text-emerald-100">Hạng Hiện Tại Của Bạn</span>
-                    <span className="px-3 py-1 bg-amber-400 text-amber-950 text-xs font-black rounded-full shadow">🥇 HỘI VIÊN HẠNG VÀNG</span>
-                  </div>
-                  
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-xs font-bold">
-                      <span>Tiến trình lên Kim Cương: 83%</span>
-                      <span className="font-mono">1,250 / 1,500 pt</span>
+                {/* Current User Rank Status Banner - 100% Dynamic */}
+                {(() => {
+                  const pts = currentUser.points;
+                  let currentBadge = "🥉 HỘI VIÊN HẠNG ĐỒNG";
+                  let nextRankName = "Bạc 🥈";
+                  let targetPts = 500;
+                  let progress = Math.min(100, Math.round((pts / 500) * 100));
+                  let needed = Math.max(0, 500 - pts);
+
+                  if (pts >= 3000) {
+                    currentBadge = "👑 HỘI VIÊN HUYỀN THOẠI";
+                    nextRankName = "Cấp Tối Đa ✨";
+                    targetPts = pts;
+                    progress = 100;
+                    needed = 0;
+                  } else if (pts >= 1500) {
+                    currentBadge = "💎 HỘI VIÊN KIM CƯƠNG";
+                    nextRankName = "Huyền Thoại 👑";
+                    targetPts = 3000;
+                    progress = Math.min(100, Math.round(((pts - 1500) / 1500) * 100));
+                    needed = 3000 - pts;
+                  } else if (pts >= 1000) {
+                    currentBadge = "🥇 HỘI VIÊN HẠNG VÀNG";
+                    nextRankName = "Kim Cương 💎";
+                    targetPts = 1500;
+                    progress = Math.min(100, Math.round(((pts - 1000) / 500) * 100));
+                    needed = 1500 - pts;
+                  } else if (pts >= 500) {
+                    currentBadge = "🥈 HỘI VIÊN HẠNG BẠC";
+                    nextRankName = "Vàng 🥇";
+                    targetPts = 1000;
+                    progress = Math.min(100, Math.round(((pts - 500) / 500) * 100));
+                    needed = 1000 - pts;
+                  }
+
+                  return (
+                    <div className="p-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl space-y-3 shadow-md">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-bold uppercase tracking-wider text-emerald-100">Hạng Hiện Tại Của Bạn</span>
+                        <span className="px-3 py-1 bg-amber-400 text-amber-950 text-xs font-black rounded-full shadow">
+                          {currentBadge}
+                        </span>
+                      </div>
+                      
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-xs font-bold">
+                          <span>Tiến trình lên {nextRankName}: {progress}%</span>
+                          <span className="font-mono">{pts.toLocaleString()} / {targetPts.toLocaleString()} pt</span>
+                        </div>
+                        <div className="h-2.5 w-full bg-white/20 rounded-full overflow-hidden p-0.5">
+                          <div className="h-full bg-white rounded-full transition-all duration-500" style={{ width: `${progress}%` }} />
+                        </div>
+                      </div>
+                      
+                      <p className="text-[11px] text-emerald-100 font-medium">
+                        {needed > 0 ? (
+                          <>⚡ Bạn chỉ cần tích thêm <strong className="text-white underline">+{needed.toLocaleString()} pt</strong> để mở khóa Hạng {nextRankName}!</>
+                        ) : (
+                          <>🎉 Bạn đang ở cấp bậc cao nhất của hệ sinh thái EcoValues!</>
+                        )}
+                      </p>
                     </div>
-                    <div className="h-2.5 w-full bg-white/20 rounded-full overflow-hidden p-0.5">
-                      <div className="h-full bg-white rounded-full w-[83%]" />
-                    </div>
-                  </div>
-                  
-                  <p className="text-[11px] text-emerald-100 font-medium">
-                    ⚡ Bạn chỉ cần tích thêm <strong className="text-white underline">+250 pt</strong> để mở khóa Hạng Kim Cương & X2 Điểm Thưởng!
-                  </p>
-                </div>
+                  );
+                })()}
 
                 {/* 5 Tiers Detailed Roadmap List */}
                 <div className="space-y-3">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Chi Tiết 5 Cấp Bậc & Đặc Quyền:</h4>
 
-                  {TIERS.map((tier, idx) => (
-                    <div 
-                      key={idx}
-                      className={`p-4 rounded-2xl border transition-all ${
-                        tier.isCurrent
-                          ? 'bg-amber-500/10 border-amber-500/50 ring-2 ring-amber-500/20'
-                          : tier.isNext
-                          ? 'bg-emerald-500/10 border-emerald-500/40'
-                          : 'bg-secondary/40 border-border opacity-80'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xl">{tier.icon}</span>
-                          <span className="font-black text-sm text-foreground">{tier.name}</span>
-                          {tier.isCurrent && (
-                            <span className="px-2 py-0.5 bg-amber-500 text-white text-[10px] font-black rounded-md">
-                              HẠNG HIỆN TẠI
-                            </span>
-                          )}
-                          {tier.isNext && (
-                            <span className="px-2 py-0.5 bg-emerald-600 text-white text-[10px] font-black rounded-md animate-pulse">
-                              MỤC TIÊU TIẾP THEO
-                            </span>
-                          )}
-                        </div>
-                        <span className="font-mono text-xs font-extrabold text-muted-foreground">
-                          {tier.minPoints.toLocaleString()} - {tier.maxPoints > 50000 ? "Không giới hạn" : tier.maxPoints.toLocaleString()} pt
-                        </span>
-                      </div>
+                  {TIERS.map((tier, idx) => {
+                    const pts = currentUser.points;
+                    const isCurrent = pts >= tier.minPoints && pts <= tier.maxPoints;
+                    const isNext = pts < tier.minPoints && (idx === 0 || pts >= TIERS[idx - 1].minPoints);
 
-                      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs text-muted-foreground pt-1">
-                        {tier.perks.map((perk, pIdx) => (
-                          <li key={pIdx} className="flex items-center gap-1.5 font-medium">
-                            <CheckCircle className={`w-3.5 h-3.5 shrink-0 ${tier.isCurrent ? 'text-amber-500' : 'text-emerald-600'}`} />
-                            {perk}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
+                    return (
+                      <div 
+                        key={idx}
+                        className={`p-4 rounded-2xl border transition-all ${
+                          isCurrent
+                            ? 'bg-emerald-500/15 border-emerald-500 ring-2 ring-emerald-500/30'
+                            : isNext
+                            ? 'bg-amber-500/10 border-amber-500/40'
+                            : 'bg-secondary/40 border-border opacity-70'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl">{tier.icon}</span>
+                            <span className="font-black text-sm text-foreground">{tier.name}</span>
+                            {isCurrent && (
+                              <span className="px-2 py-0.5 bg-emerald-600 text-white text-[10px] font-black rounded-md shadow">
+                                HẠNG HIỆN TẠI
+                              </span>
+                            )}
+                            {isNext && (
+                              <span className="px-2 py-0.5 bg-amber-500 text-amber-950 text-[10px] font-black rounded-md animate-pulse">
+                                MỤC TIÊU TIẾP THEO
+                              </span>
+                            )}
+                          </div>
+                          <span className="font-mono text-xs font-extrabold text-muted-foreground">
+                            {tier.minPoints.toLocaleString()} - {tier.maxPoints > 50000 ? "3,000+" : tier.maxPoints.toLocaleString()} pt
+                          </span>
+                        </div>
+
+                        <ul className="space-y-1">
+                          {tier.perks.map((perk, pIdx) => (
+                            <li key={pIdx} className="text-xs text-muted-foreground flex items-center gap-1.5">
+                              <span className="text-emerald-600 font-bold">✓</span> {perk}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    );
+                  })}
                 </div>
 
                 <div className="pt-2 flex gap-3">
