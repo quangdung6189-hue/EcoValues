@@ -1,18 +1,39 @@
 import { MainLayout } from "@/components/layout/MainLayout";
 import { motion } from "framer-motion";
 import { Search, MapPin, Clock } from "lucide-react";
-import stationPlasticUrl from "@assets/generated_images/station-plastic.jpg";
-import stationPaperUrl from "@assets/generated_images/station-paper.jpg";
-import stationEwasteUrl from "@assets/generated_images/station-ewaste.jpg";
+import cmcLibraryUrl from "@assets/generated_images/cmc-library.jpg";
+import cmcItLabUrl from "@assets/generated_images/cmc-it-lab.jpg";
+import cmcAuditoriumUrl from "@assets/generated_images/cmc-auditorium.jpg";
 
-// Using real generated images for the first 3, then recycling them for demo
+// 3 Real CMC Stations matching provided campus photos
 const STATIONS_DATA = [
-  { id: 1, name: "Trạm Thư Viện", location: "Tầng 1 - Khu tự học", image: stationPaperUrl, types: ["paper", "plastic"], capacity: 45, hours: "08:00 - 20:00" },
-  { id: 2, name: "Trạm Căng tin Tòa A", location: "Tòa A - Tầng 1", image: stationPlasticUrl, types: ["plastic"], capacity: 85, hours: "07:00 - 18:00" },
-  { id: 3, name: "Trạm IT Lab", location: "Tòa A - Tầng 3", image: stationEwasteUrl, types: ["ewaste"], capacity: 20, hours: "08:00 - 17:00" },
-  { id: 4, name: "Trạm Hội Trường", location: "Hội trường chính", image: stationPaperUrl, types: ["paper", "plastic"], capacity: 30, hours: "Khi có sự kiện" },
-  { id: 5, name: "Trạm Tòa B", location: "Tòa B - Sảnh Tầng 1", image: stationPlasticUrl, types: ["plastic", "ewaste"], capacity: 60, hours: "07:00 - 21:00" },
-  { id: 6, name: "Trạm Ký Túc Xá", location: "Khu nội trú - Tầng 1", image: stationPaperUrl, types: ["paper", "plastic", "ewaste"], capacity: 75, hours: "24/7" },
+  { 
+    id: 1, 
+    name: "Trạm Thư Viện", 
+    location: "CMC CS2 (Vạn Phúc - Hà Đông) • Tầng 1 Khu tự học", 
+    image: cmcLibraryUrl, 
+    types: ["paper", "plastic"], 
+    capacity: 45, 
+    hours: "08:00 - 20:30" 
+  },
+  { 
+    id: 2, 
+    name: "Trạm IT Lab", 
+    location: "CMC CS2 (Vạn Phúc - Hà Đông) • Tòa A Tầng 3 (IC Design)", 
+    image: cmcItLabUrl, 
+    types: ["ewaste", "plastic"], 
+    capacity: 20, 
+    hours: "08:00 - 17:30" 
+  },
+  { 
+    id: 3, 
+    name: "Trạm Hội Trường", 
+    location: "CMC CS1 (Duy Tân - Cầu Giấy) • Hội trường chính", 
+    image: cmcAuditoriumUrl, 
+    types: ["paper", "plastic", "ewaste"], 
+    capacity: 30, 
+    hours: "Khi có sự kiện" 
+  },
 ];
 
 export default function SupportStations() {
@@ -34,7 +55,7 @@ export default function SupportStations() {
             transition={{ delay: 0.1 }}
             className="text-background/80 max-w-2xl mx-auto"
           >
-            Khám phá 12 trạm phân loại rác thông minh trên toàn khuôn viên CMC University.
+            Khám phá các trạm phân loại rác thông minh thực tế tại các cơ sở CMC University.
           </motion.p>
         </div>
       </section>
@@ -46,15 +67,16 @@ export default function SupportStations() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
             <input 
               type="text" 
-              placeholder="Tìm kiếm tên trạm, tòa nhà..." 
+              placeholder="Tìm kiếm tên trạm, cơ sở, tòa nhà..." 
               className="w-full pl-10 pr-4 py-2.5 bg-secondary/50 border-none rounded-full text-sm font-medium focus:ring-2 focus:ring-primary outline-none"
             />
           </div>
           
           <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
-            <button className="px-5 py-2 rounded-full text-sm font-bold bg-foreground text-background whitespace-nowrap">Tất cả</button>
+            <button className="px-5 py-2 rounded-full text-sm font-bold bg-foreground text-background whitespace-nowrap">Tất cả (3 Trạm)</button>
             <button className="px-5 py-2 rounded-full text-sm font-bold bg-secondary text-foreground hover:bg-secondary/80 whitespace-nowrap">Trạm Nhựa</button>
             <button className="px-5 py-2 rounded-full text-sm font-bold bg-secondary text-foreground hover:bg-secondary/80 whitespace-nowrap">Trạm Giấy</button>
+            <button className="px-5 py-2 rounded-full text-sm font-bold bg-secondary text-foreground hover:bg-secondary/80 whitespace-nowrap">Trạm Điện tử</button>
           </div>
         </div>
       </section>
@@ -89,11 +111,11 @@ export default function SupportStations() {
                   
                   <div className="space-y-3 mb-6">
                     <div className="flex items-center text-muted-foreground text-sm">
-                      <MapPin className="w-4 h-4 mr-2 text-primary" />
+                      <MapPin className="w-4 h-4 mr-2 text-primary flex-shrink-0" />
                       {station.location}
                     </div>
                     <div className="flex items-center text-muted-foreground text-sm">
-                      <Clock className="w-4 h-4 mr-2 text-primary" />
+                      <Clock className="w-4 h-4 mr-2 text-primary flex-shrink-0" />
                       {station.hours}
                     </div>
                   </div>

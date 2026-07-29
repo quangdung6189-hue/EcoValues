@@ -61,7 +61,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 const defaultStats = [
   { label: "Rác đã tái chế", value: "48.5 kg", icon: Recycle, delay: 0.1 },
   { label: "Sinh viên tham gia", value: "20", icon: Users, delay: 0.2 },
-  { label: "Trạm thu gom", value: "6", icon: TreePine, delay: 0.3 },
+  { label: "Trạm thu gom", value: "3", icon: TreePine, delay: 0.3 },
   { label: "Tỷ lệ phân loại đúng", value: "94%", icon: TrendingUp, delay: 0.4 },
 ];
 
@@ -123,7 +123,7 @@ export default function Home() {
   const stats = [
     { label: "Rác đã tái chế", value: serverStats?.totalRecycledFormatted || "48.5 kg", icon: Recycle, delay: 0.1 },
     { label: "Sinh viên tham gia", value: serverStats?.activeStudents ? `${serverStats.activeStudents}` : "20", icon: Users, delay: 0.2 },
-    { label: "Trạm thu gom", value: serverStats?.totalStations ? `${serverStats.totalStations}` : "6", icon: TreePine, delay: 0.3 },
+    { label: "Trạm thu gom", value: serverStats?.totalStations ? `${serverStats.totalStations}` : "3", icon: TreePine, delay: 0.3 },
     { label: "Tỷ lệ phân loại đúng", value: serverStats?.accuracyRate ? `${serverStats.accuracyRate}%` : "94%", icon: TrendingUp, delay: 0.4 },
   ];
 

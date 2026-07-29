@@ -44,9 +44,8 @@ interface Station {
   lng: number;
 }
 
-// Optimized, streamlined set of 6 stations focused on CMC CS2 (Vạn Phúc - Hà Đông) & CS1 (Duy Tân - Cầu Giấy)
+// 3 Main Stations matching real campus photos (Library, IT Lab, Auditorium)
 const DEFAULT_STATIONS: Station[] = [
-  // === CMC CS2: Vạn Phúc, Hà Đông (Focus 1) ===
   {
     id: "S01",
     name: "Trạm Thư Viện Central CS2",
@@ -57,7 +56,7 @@ const DEFAULT_STATIONS: Station[] = [
     location: "Trung tâm Thư Viện Vạn Phúc - Hà Đông",
     types: ["paper", "plastic"],
     status: "active",
-    capacity: 40,
+    capacity: 45,
     lastCollected: "08:30 Hôm nay",
     hours: "08:00 - 20:30",
     lat: 20.9788,
@@ -65,84 +64,34 @@ const DEFAULT_STATIONS: Station[] = [
   },
   {
     id: "S02",
-    name: "Trạm Căng Tin Tòa B CS2",
+    name: "Trạm IT Lab Tech Zone CS2",
     campus: "CS2",
     campusName: "CMC CS2 (Vạn Phúc - Hà Đông)",
-    building: "Tòa B CS2",
-    floor: "Tầng 1",
-    location: "Khu ẩm thực Căng tin Hà Đông",
-    types: ["plastic"],
-    status: "full",
-    capacity: 88,
-    lastCollected: "Hôm qua",
-    hours: "07:00 - 19:00",
-    lat: 20.9778,
-    lng: 105.7752
+    building: "Tòa A CS2",
+    floor: "Tầng 3 (IC Design)",
+    location: "Phòng Lab Máy Tính IC Design Vạn Phúc",
+    types: ["ewaste", "plastic"],
+    status: "active",
+    capacity: 20,
+    lastCollected: "09:15 Hôm nay",
+    hours: "08:00 - 17:30",
+    lat: 20.9785,
+    lng: 105.7770
   },
   {
     id: "S03",
-    name: "Trạm Ký Túc Xá CS2",
-    campus: "CS2",
-    campusName: "CMC CS2 (Vạn Phúc - Hà Đông)",
-    building: "KTX Hà Đông",
-    floor: "Tầng 1",
-    location: "Khu nội trú Sinh Viên Vạn Phúc",
+    name: "Trạm Hội Trường Sự Kiện CS1",
+    campus: "CS1",
+    campusName: "CMC CS1 (Duy Tân - Cầu Giấy)",
+    building: "Tòa Duy Tân",
+    floor: "Hội Trường Chính",
+    location: "Sảnh Hội Trường Đại Hội Sinh Viên Duy Tân",
     types: ["paper", "plastic", "ewaste"],
     status: "active",
-    capacity: 70,
-    lastCollected: "09:00 Hôm nay",
-    hours: "24/7",
-    lat: 20.9770,
-    lng: 105.7745
-  },
-
-  // === CMC CS1: Duy Tân, Cầu Giấy (Focus 2) ===
-  {
-    id: "S04",
-    name: "Trạm Thư Viện CS1",
-    campus: "CS1",
-    campusName: "CMC CS1 (Duy Tân - Cầu Giấy)",
-    building: "Tòa Duy Tân",
-    floor: "Tầng 1",
-    location: "Sảnh Thư Viện - Khu tự học Cầu Giấy",
-    types: ["paper", "plastic"],
-    status: "active",
-    capacity: 45,
+    capacity: 30,
     lastCollected: "10:30 Hôm nay",
-    hours: "08:00 - 20:00",
-    lat: 21.0318,
-    lng: 105.7828
-  },
-  {
-    id: "S05",
-    name: "Trạm Căng Tin CS1",
-    campus: "CS1",
-    campusName: "CMC CS1 (Duy Tân - Cầu Giấy)",
-    building: "Tòa Duy Tân",
-    floor: "Tầng B1",
-    location: "Khu ẩm thực Căng tin CS1 Cầu Giấy",
-    types: ["plastic"],
-    status: "full",
-    capacity: 92,
-    lastCollected: "14:00 Hôm qua",
-    hours: "07:00 - 18:00",
-    lat: 21.0310,
-    lng: 105.7818
-  },
-  {
-    id: "S06",
-    name: "Trạm IT & AI Hub CS1",
-    campus: "CS1",
-    campusName: "CMC CS1 (Duy Tân - Cầu Giấy)",
-    building: "Tòa Công Nghệ",
-    floor: "Tầng 3",
-    location: "Hành lang Phòng Lab Máy Tính CS1",
-    types: ["ewaste"],
-    status: "active",
-    capacity: 25,
-    lastCollected: "Thứ 2 vừa rồi",
-    hours: "08:00 - 17:00",
-    lat: 21.0326,
+    hours: "Khi có sự kiện",
+    lat: 21.0332,
     lng: 105.7834
   }
 ];
