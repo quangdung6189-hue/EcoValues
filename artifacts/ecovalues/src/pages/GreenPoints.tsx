@@ -1,63 +1,58 @@
-import { useState, useEffect, useRef } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Trophy, 
   Award, 
-  Gift, 
-  Info, 
-  Star, 
+  Sparkles, 
   PlusCircle, 
-  CheckCircle2, 
+  CheckCircle, 
+  Upload, 
+  Lock, 
+  UserCheck, 
+  User, 
+  Hash, 
+  Check, 
+  ArrowRight, 
+  Smartphone, 
+  GraduationCap, 
+  Building, 
+  ShieldAlert, 
+  Gift, 
   Ticket, 
-  Sparkles,
-  Lock,
-  User,
-  LogOut,
-  ShieldCheck,
-  Zap,
+  Camera, 
+  X,
   Coffee,
-  ShoppingBag,
   Droplet,
+  ShoppingBag,
   BookOpen,
   Utensils,
-  X,
-  UserCheck,
-  Smartphone,
-  GraduationCap,
-  Building,
-  KeyRound,
-  ArrowRight,
-  ArrowLeft,
-  Mail,
-  Hash,
-  Check,
-  RotateCcw,
-  Camera,
-  Upload
+  Calendar,
+  Clock,
+  Flame,
+  Zap
 } from "lucide-react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState, useRef, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 
 interface UserLeaderboard {
   id: number;
   rank: number;
   name: string;
-  points: number;
   major: string;
+  points: number;
   itemsRecycled: number;
-  badge?: string;
 }
 
 interface Reward {
   id: string;
   title: string;
-  pointsCost: number;
   category: string;
-  icon: string;
-  available: number;
+  pointsCost: number;
+  stock: number;
   description: string;
+  iconName: string;
 }
 
 export default function GreenPoints() {
@@ -69,20 +64,19 @@ export default function GreenPoints() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
   
-  // Registration Stepper states (3 steps/mốc)
+  // Registration Stepper (3-step pipeline)
   const [authStep, setAuthStep] = useState(1);
   const [authName, setAuthName] = useState("");
   const [authAge, setAuthAge] = useState(20);
   const [authSchool, setAuthSchool] = useState("Đại học CMC");
   const [authPhone, setAuthPhone] = useState("");
-  const [authRole, setAuthRole] = useState("student"); // "student" | "teacher"
+  const [authRole, setAuthRole] = useState("student");
   const [authMajor, setAuthMajor] = useState("Công nghệ Thông tin");
   const [authVolunteerRole, setAuthVolunteerRole] = useState("Trực trạm phân loại");
-  const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
-  const [authStudentId, setAuthStudentId] = useState("");
 
-  // OTP State
+  const [authStudentId, setAuthStudentId] = useState("");
+  const [authEmail, setAuthEmail] = useState("");
   const [authOtpInput, setAuthOtpInput] = useState("");
   const [sentOtpCode, setSentOtpCode] = useState("");
   const [isOtpSent, setIsOtpSent] = useState(false);
@@ -90,15 +84,18 @@ export default function GreenPoints() {
 
   // Claim Points Modal State
   const [showClaimModal, setShowClaimModal] = useState(false);
-  const [itemType, setItemType] = useState("plastic");
+  const [itemType, setItemType] = useState("Chai Nhựa & Vỏ Hộp (+15 pt/món)");
   const [quantity, setQuantity] = useState(5);
   const [proofImage, setProofImage] = useState<string | null>(null);
-  const [redeemedVoucher, setRedeemedVoucher] = useState<{ title: string; code: string } | null>(null);
-
-  // States for Live WebRTC Camera Stream
   const [isWebcamActive, setIsWebcamActive] = useState(false);
   const [webcamStream, setWebcamStream] = useState<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Leaderboard Time Filter State: "day" | "month" | "year"
+  const [leaderboardFilter, setLeaderboardFilter] = useState<"day" | "month" | "year">("month");
+
+  // Redeemed Voucher Modal State
+  const [redeemedVoucher, setRedeemedVoucher] = useState<{ title: string; code: string } | null>(null);
 
   // Start Live WebRTC Camera
   const handleStartWebcam = async () => {
@@ -154,118 +151,46 @@ export default function GreenPoints() {
     }
   };
 
-  // States for dynamic Ethereal email testing
-  const [previewEmailUrl, setPreviewEmailUrl] = useState("");
-  const [isSendingOtp, setIsSendingOtp] = useState(false);
-  const [resendTimer, setResendTimer] = useState(0);
+  // Dynamic Leaderboard Generation based on Time Filter & Active Users
+  const getDynamicLeaderboard = (): UserLeaderboard[] => {
+    const activeUserName = user ? user.name : "Trần Hữu Toàn";
+    const activeUserPoints = user ? user.points : 100;
+    const activeUserStudentId = user ? user.studentId : "BIT250098";
 
-  // Countdown timer for Resend OTP
-  useEffect(() => {
-    let timer: any;
-    if (resendTimer > 0) {
-      timer = setInterval(() => setResendTimer((prev) => prev - 1), 1000);
-    }
-    return () => clearInterval(timer);
-  }, [resendTimer]);
+    // Adjust points scale based on timeframe filter
+    const scale = leaderboardFilter === "day" ? 0.2 : leaderboardFilter === "year" ? 3.5 : 1.0;
 
-  // Fetch Leaderboard from backend API
-  const { data: leaderboard = [], isLoading: isLeaderboardLoading } = useQuery<UserLeaderboard[]>({
-    queryKey: ['/api/leaderboard'],
-    queryFn: async () => {
-      const res = await fetch('/api/leaderboard');
-      if (!res.ok) throw new Error('Không thể tải bảng xếp hạng');
-      return res.json();
-    }
-  });
+    let rawList = [
+      { id: 1, name: activeUserName, major: `Mã SV: ${activeUserStudentId}`, points: activeUserPoints, itemsRecycled: Math.floor(activeUserPoints / 3) },
+      { id: 2, name: "Nguyễn Minh Anh", major: "Quản trị Kinh doanh", points: Math.round(1450 * scale), itemsRecycled: Math.round(180 * scale) },
+      { id: 3, name: "Lê Hoàng Nam", major: "Thiết kế Đồ họa", points: Math.round(1280 * scale), itemsRecycled: Math.round(155 * scale) },
+      { id: 4, name: "Phạm Hải Yến", major: "Marketing Digital", points: Math.round(1120 * scale), itemsRecycled: Math.round(140 * scale) },
+      { id: 5, name: "Trần Đức Mạnh", major: "Công nghệ Thông tin", points: Math.round(980 * scale), itemsRecycled: Math.round(115 * scale) },
+      { id: 6, name: "Vũ Phương Thảo", major: "Ngôn ngữ Anh", points: Math.round(850 * scale), itemsRecycled: Math.round(95 * scale) },
+      { id: 7, name: "Đỗ Gia Bảo", major: "Khoa học Máy tính", points: Math.round(720 * scale), itemsRecycled: Math.round(80 * scale) }
+    ];
 
-  // Fetch Rewards from backend API
-  const { data: rewards = [] } = useQuery<Reward[]>({
-    queryKey: ['/api/rewards'],
-    queryFn: async () => {
-      const res = await fetch('/api/rewards');
-      if (!res.ok) throw new Error('Không thể tải danh sách quà tặng');
-      return res.json();
-    }
-  });
+    // Sort descending by points
+    rawList.sort((a, b) => b.points - a.points);
 
-  // Handle Send OTP via nodemailer backend Ethereal relay with graceful fallback
-  const handleSendOtp = async () => {
-    if (!authEmail.includes("@")) {
-      toast({
-        title: "Email Không Hợp Lệ ⚠️",
-        description: "Vui lòng nhập địa chỉ email hợp lệ để nhận OTP.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    setIsSendingOtp(true);
-    setResendTimer(30);
-    try {
-      let code = "";
-      let previewUrl = "";
-      let success = false;
-
-      try {
-        const res = await fetch('/api/auth/send-otp', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: authEmail })
-        });
-        
-        const contentType = res.headers.get("content-type");
-        if (res.ok && contentType && contentType.includes("application/json")) {
-          const data = await res.json();
-          if (data && data.code) {
-            code = data.code;
-            previewUrl = data.previewUrl || "";
-            success = true;
-          }
-        }
-      } catch (e) {
-        // Backend offline
-      }
-
-      if (!success || !code) {
-        code = Math.floor(100000 + Math.random() * 900000).toString();
-      }
-
-      setSentOtpCode(code);
-      setPreviewEmailUrl(previewUrl);
-      setIsOtpSent(true);
-
-      // SECURE TOAST: NEVER REVEALS OTP DIGITS
-      toast({
-        title: "Đã Gửi Mã OTP Xác Thực! 📨",
-        description: `Hệ thống đã gửi mã OTP 6 số về hòm thư Gmail ${authEmail}. Vui lòng kiểm tra Hộp thư đến.`,
-      });
-    } catch (err: any) {
-      const fallbackCode = Math.floor(100000 + Math.random() * 900000).toString();
-      setSentOtpCode(fallbackCode);
-      setIsOtpSent(true);
-      toast({
-        title: "Đã Gửi Mã OTP Xác Thực! 📨",
-        description: `Hệ thống đã phát hành mã xác thực về Gmail. Vui lòng kiểm tra Hộp thư.`,
-      });
-    } finally {
-      setIsSendingOtp(false);
-    }
+    // Assign rank 1..N
+    return rawList.map((item, idx) => ({
+      ...item,
+      rank: idx + 1
+    }));
   };
 
-  // Handle Verify OTP & Register
-  const handleVerifyAndRegister = () => {
-    if (authOtpInput.trim() !== sentOtpCode.trim()) {
-      toast({
-        title: "Mã OTP Không Đúng ❌",
-        description: "Vui lòng kiểm tra lại mã xác nhận 6 số vừa nhận qua Email.",
-        variant: "destructive"
-      });
-      return;
-    }
+  const leaderboard = getDynamicLeaderboard();
 
-    setIsOtpVerified(true);
-    handleRegisterSubmit();
-  };
+  // Rewards catalog data
+  const rewards: Reward[] = [
+    { id: "r1", title: "Voucher Highlands Coffee 100.000đ", category: "Voucher", pointsCost: 900, stock: 45, description: "Áp dụng cho toàn bộ đồ uống trên hệ thống Highlands Coffee toàn quốc.", iconName: "Coffee" },
+    { id: "r2", title: "Tai Nghe Eco Wireless Bluetooth", category: "Quà Tặng", pointsCost: 2500, stock: 12, description: "Tai nghe chống ồn làm từ nhựa tái chế cao cấp thương hiệu EcoValues.", iconName: "Sparkles" },
+    { id: "r3", title: "Áo Thun Đại Sứ Xanh EcoValues", category: "Thời Trang", pointsCost: 1800, stock: 20, description: "Áo thun cotton hữu cơ 100% in logo Đại sứ Xanh CMC.", iconName: "ShoppingBag" },
+    { id: "r4", title: "Balo Chống Nước Tre Eco 20L", category: "Quà Tặng", pointsCost: 1500, stock: 15, description: "Balo thiết kế chống nước siêu bền làm từ xơ sợi tre tự nhiên.", iconName: "ShoppingBag" },
+    { id: "r5", title: "Bình Giữ Nhiệt Inox Eco 750ml", category: "Dụng Cụ", pointsCost: 500, stock: 50, description: "Bình inox 304 giữ nhiệt 24h trang bị nắp bật thông minh.", iconName: "Droplet" },
+    { id: "r6", title: "Voucher Căng Tin CMC 50.000đ", category: "Voucher", pointsCost: 400, stock: 80, description: "Giảm 50.000đ trực tiếp khi thanh toán suất ăn căng tin trường CMC.", iconName: "Utensils" }
+  ];
 
   // Register final submission
   const handleRegisterSubmit = () => {
@@ -292,7 +217,6 @@ export default function GreenPoints() {
     }
 
     setShowAuthModal(false);
-    resetRegisterFlow();
 
     toast({
       title: "Đăng Ký Thành Công! 🥉",
@@ -300,22 +224,13 @@ export default function GreenPoints() {
     });
   };
 
-  // Reset register flow steps
-  const resetRegisterFlow = () => {
-    setAuthStep(1);
-    setIsOtpSent(false);
-    setIsOtpVerified(false);
-    setAuthOtpInput("");
-    setSentOtpCode("");
-  };
-
   // Handle login submit
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const finalEmail = authEmail || "minhanh@cmc.edu.vn";
-    const finalStudentId = authStudentId || "CMC-202488";
+    const finalEmail = authEmail || "ecovalous@gmail.com";
+    const finalStudentId = authStudentId || "CMC-251156";
     
-    const loggedUser = login("Nguyễn Minh Anh", finalEmail, finalStudentId, "Quản trị Kinh doanh", 2450);
+    const loggedUser = login("Đặng Quang Dũng", finalEmail, finalStudentId, "Công nghệ Thông tin", 100);
     setShowAuthModal(false);
 
     toast({
@@ -337,14 +252,14 @@ export default function GreenPoints() {
     setShowClaimModal(true);
   };
 
-  // Claim Points Mutation (Guaranteed to work safely without JSON parsing crash!)
+  // Claim Points Mutation (Adjusted Rates + Guaranteed Safe Execution!)
   const claimMutation = useMutation({
     mutationFn: async () => {
-      let rate = 50;
-      if (itemType.includes("Chai Nhựa")) rate = 50;
-      else if (itemType.includes("Giấy")) rate = 40;
-      else if (itemType.includes("Kim Loại")) rate = 80;
-      else if (itemType.includes("Điện Tử")) rate = 150;
+      let rate = 15;
+      if (itemType.includes("Chai Nhựa")) rate = 15;
+      else if (itemType.includes("Giấy")) rate = 10;
+      else if (itemType.includes("Kim Loại")) rate = 25;
+      else if (itemType.includes("Điện Tử")) rate = 40;
 
       const earnedPoints = rate * quantity;
       const currentUserName = user?.name || "Thành Viên EcoValues";
@@ -393,7 +308,6 @@ export default function GreenPoints() {
       setProofImage(null);
       setShowClaimModal(false);
       queryClient.invalidateQueries({ queryKey: ['/api/leaderboard'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/stats'] });
     },
     onError: (err: any) => {
       toast({
@@ -599,13 +513,31 @@ export default function GreenPoints() {
               
               {/* Top 3 Symmetrical Olympic Podium Cards */}
               <div>
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                   <h2 className="text-2xl font-black text-foreground flex items-center gap-2.5 font-sans">
-                    <Trophy className="w-7 h-7 text-amber-500 animate-pulse" /> Top Đại Sứ Xanh Tháng Này
+                    <Trophy className="w-7 h-7 text-amber-500 animate-pulse" /> Top Đại Sứ Xanh CMC
                   </h2>
-                  <span className="text-xs font-extrabold text-emerald-600 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
-                    Cập nhật Live ⚡
-                  </span>
+                  
+                  {/* Leaderboard Time Filter Tabs: Day / Month / Year */}
+                  <div className="flex bg-secondary p-1 rounded-2xl border border-border shrink-0 self-start sm:self-auto">
+                    {[
+                      { key: "day", label: "Hôm Nay 📅" },
+                      { key: "month", label: "Tháng Này 🏆" },
+                      { key: "year", label: "Trong Năm 👑" }
+                    ].map((tab) => (
+                      <button
+                        key={tab.key}
+                        onClick={() => setLeaderboardFilter(tab.key as any)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all ${
+                          leaderboardFilter === tab.key
+                            ? 'bg-emerald-600 text-white shadow-md'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Symmetrical Podium Grid: Rank 2 (Left), Rank 1 (Center High), Rank 3 (Right) */}
@@ -663,643 +595,96 @@ export default function GreenPoints() {
                 </div>
               </div>
 
-              {/* Full Detailed Leaderboard Table */}
+              {/* Ranks 4+ List Table */}
               <div className="bg-card border border-border rounded-3xl p-6 shadow-sm space-y-4">
-                <div className="flex items-center justify-between border-b border-border pb-3">
-                  <h3 className="font-extrabold text-lg text-foreground flex items-center gap-2">
-                    <Award className="w-5 h-5 text-emerald-600" /> Bảng Xếp Hạng Chi Tiết
-                  </h3>
-                  <span className="text-xs text-muted-foreground font-bold">Hiển thị {leaderboard.length} đại sứ</span>
-                </div>
-
-                <div className="space-y-2.5">
+                <h3 className="font-extrabold text-foreground text-sm uppercase tracking-wider text-muted-foreground">
+                  Danh Sách Đại Sứ Xanh Tiêu Biểu #{leaderboardFilter === "day" ? "Hôm Nay" : leaderboardFilter === "year" ? "Trong Năm" : "Tháng Này"}
+                </h3>
+                <div className="space-y-2">
                   {remainingUsers.map((u) => (
-                    <motion.div 
+                    <div 
                       key={u.id}
-                      whileHover={{ x: 4 }}
-                      className="p-3.5 bg-secondary/40 hover:bg-secondary/80 border border-border/50 rounded-2xl flex items-center justify-between gap-4 transition-all"
+                      className="p-3.5 rounded-2xl bg-secondary/40 hover:bg-secondary border border-border/60 flex items-center justify-between transition-all"
                     >
                       <div className="flex items-center gap-3.5">
-                        <div className="w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-600 font-mono font-black text-xs flex items-center justify-center border border-emerald-500/20 shrink-0">
+                        <span className="w-7 h-7 rounded-full bg-emerald-500/10 text-emerald-600 font-extrabold text-xs flex items-center justify-center font-mono shrink-0">
                           #{u.rank}
-                        </div>
-                        <div className="space-y-0.5">
-                          <p className="font-bold text-foreground text-xs md:text-sm">{u.name}</p>
-                          <p className="text-[11px] text-muted-foreground font-medium">{u.major}</p>
+                        </span>
+                        <div>
+                          <p className="font-bold text-foreground text-sm leading-tight">{u.name}</p>
+                          <p className="text-[11px] text-muted-foreground">{u.major}</p>
                         </div>
                       </div>
-
-                      <div className="text-right shrink-0">
-                        <p className="font-black font-mono text-emerald-600 text-xs md:text-sm">🔥 {u.points} pt</p>
-                        <p className="text-[10px] text-muted-foreground font-bold">♻️ {u.itemsRecycled} sản phẩm</p>
+                      <div className="text-right">
+                        <span className="font-black text-emerald-600 text-sm font-mono">{u.points} pt</span>
+                        <p className="text-[10px] text-muted-foreground font-semibold">{u.itemsRecycled} món rác</p>
                       </div>
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
               </div>
 
             </div>
 
-            {/* Right 1 Col: Increased Points Rules */}
+            {/* Right Col: Rewards Store */}
             <div className="space-y-6">
-              
-              <div className="bg-card border border-border rounded-3xl p-6 shadow-sm space-y-4">
-                <div className="flex items-center justify-between border-b border-border pb-3">
-                  <h3 className="font-extrabold text-foreground text-base flex items-center gap-2">
-                    <Zap className="w-5 h-5 text-emerald-600" /> Quy Định Tích Điểm (Mới)
-                  </h3>
-                  <span className="text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-600 px-2 py-0.5 rounded">Tăng Điểm</span>
+              <div className="bg-card border border-border p-6 rounded-3xl shadow-sm space-y-6">
+                <div>
+                  <h2 className="text-xl font-black text-foreground flex items-center gap-2 font-sans">
+                    <Gift className="w-5 h-5 text-emerald-600" /> Cửa Hàng Đổi Quà Xanh
+                  </h2>
+                  <p className="text-xs text-muted-foreground pt-0.5">Dùng điểm thưởng phân loại rác để nhận Voucher & Quà độc quyền</p>
                 </div>
 
-                <div className="space-y-3">
-                  <div className="p-3 bg-secondary/60 rounded-2xl flex justify-between items-center text-xs">
-                    <div>
-                      <p className="font-bold text-foreground">Chai nhựa, lon nhôm</p>
-                      <p className="text-[10px] text-muted-foreground">1 sản phẩm PET / CAN</p>
-                    </div>
-                    <span className="font-black font-mono text-emerald-600 text-sm bg-emerald-500/10 px-2.5 py-1 rounded-xl border border-emerald-500/20">
-                      +50 pt
-                    </span>
-                  </div>
+                <div className="space-y-4">
+                  {rewards.map((r) => {
+                    const IconComponent = getRewardIcon(r.iconName);
+                    const canAfford = isLoggedIn && user && user.points >= r.pointsCost;
 
-                  <div className="p-3 bg-secondary/60 rounded-2xl flex justify-between items-center text-xs">
-                    <div>
-                      <p className="font-bold text-foreground">Giấy, bìa carton</p>
-                      <p className="text-[10px] text-muted-foreground">1 kg giấy tái chế</p>
-                    </div>
-                    <span className="font-black font-mono text-emerald-600 text-sm bg-emerald-500/10 px-2.5 py-1 rounded-xl border border-emerald-500/20">
-                      +40 pt
-                    </span>
-                  </div>
-
-                  <div className="p-3 bg-secondary/60 rounded-2xl flex justify-between items-center text-xs">
-                    <div>
-                      <p className="font-bold text-foreground">Rác điện tử & pin cũ</p>
-                      <p className="text-[10px] text-muted-foreground">1 món thiết bị cũ</p>
-                    </div>
-                    <span className="font-black font-mono text-emerald-600 text-sm bg-emerald-500/10 px-2.5 py-1 rounded-xl border border-emerald-500/20">
-                      +150 pt
-                    </span>
-                  </div>
-
-                  <div className="p-3 bg-secondary/60 rounded-2xl flex justify-between items-center text-xs">
-                    <div>
-                      <p className="font-bold text-foreground">Trực trạm & Workshop</p>
-                      <p className="text-[10px] text-muted-foreground">1 giờ tình nguyện viên</p>
-                    </div>
-                    <span className="font-black font-mono text-emerald-600 text-sm bg-emerald-500/10 px-2.5 py-1 rounded-xl border border-emerald-500/20">
-                      +200 pt
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-
-          </div>
-
-          {/* Expanded Eco Rewards Store Grid (9 Rewards) */}
-          <div className="mt-16 space-y-6">
-            <div className="flex justify-between items-end border-b border-border pb-4">
-              <div>
-                <h2 className="text-2xl md:text-3xl font-black text-foreground flex items-center gap-2 font-sans tracking-tight">
-                  <Gift className="w-7 h-7 text-emerald-600" /> Cửa Hàng Đổi Quà Tích Điểm ({rewards.length} Quà Tặng)
-                </h2>
-                <p className="text-xs md:text-sm text-muted-foreground mt-1">Dùng Điểm Xanh đã tích lũy để nhận voucher và các vật phẩm xanh thân thiện môi trường</p>
-              </div>
-
-              {isLoggedIn && user && (
-                <div className="text-right font-mono text-xs">
-                  <span className="text-muted-foreground">Ví điểm xanh: </span>
-                  <strong className="text-emerald-600 font-bold text-base">{user.points} pt</strong>
-                </div>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {rewards.map((reward) => {
-                const IconComp = getRewardIcon(reward.icon);
-                const canAfford = isLoggedIn && user && user.points >= reward.pointsCost;
-
-                return (
-                  <motion.div
-                    key={reward.id}
-                    whileHover={{ y: -4 }}
-                    className="bg-card border border-border rounded-3xl p-6 shadow-sm flex flex-col justify-between hover:border-emerald-500/40 transition-all space-y-4"
-                  >
-                    <div>
-                      <div className="flex justify-between items-start mb-3">
-                        <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
-                          <IconComp className="w-6 h-6" />
-                        </div>
-                        <span className="px-2.5 py-1 rounded-full text-xs font-black font-mono bg-emerald-600 text-white shadow">
-                          {reward.pointsCost} pt
-                        </span>
-                      </div>
-
-                      <span className="text-[10px] font-bold uppercase text-emerald-600 bg-emerald-500/10 px-2 py-0.5 rounded">
-                        {reward.category}
-                      </span>
-                      <h3 className="font-bold text-foreground text-base mt-1.5">{reward.title}</h3>
-                      <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">{reward.description}</p>
-                    </div>
-
-                    <div className="pt-4 border-t border-border/60 flex items-center justify-between gap-3">
-                      <span className="text-[11px] text-muted-foreground font-medium">Còn lại: <strong>{reward.available} suất</strong></span>
-
-                      <button
-                        onClick={() => handleRedeemReward(reward)}
-                        disabled={redeemMutation.isPending}
-                        className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all shadow-sm ${
-                          isLoggedIn && canAfford
-                            ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                            : 'bg-secondary text-muted-foreground hover:bg-secondary/80'
-                        }`}
+                    return (
+                      <div 
+                        key={r.id}
+                        className="p-4 rounded-2xl border border-border bg-secondary/30 hover:border-emerald-500/40 transition-all space-y-3"
                       >
-                        {isLoggedIn ? (canAfford ? 'Đổi Quà Ngay 🎁' : 'Chưa Đủ Điểm') : 'Đăng Nhập Để Đổi'}
-                      </button>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
+                        <div className="flex items-start gap-3">
+                          <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 shrink-0">
+                            <IconComponent className="w-5 h-5" />
+                          </div>
+                          <div className="space-y-1 flex-1">
+                            <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 text-[10px] font-black uppercase tracking-wider">
+                              {r.category}
+                            </span>
+                            <h3 className="font-bold text-foreground text-sm leading-snug">{r.title}</h3>
+                            <p className="text-[11px] text-muted-foreground leading-relaxed">{r.description}</p>
+                          </div>
+                        </div>
 
+                        <div className="flex items-center justify-between pt-2 border-t border-border/60">
+                          <span className="font-black text-emerald-600 text-sm font-mono">
+                            {r.pointsCost} pt
+                          </span>
+                          <button
+                            onClick={() => handleRedeemReward(r)}
+                            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95 ${
+                              canAfford 
+                                ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow'
+                                : 'bg-secondary text-muted-foreground border border-border'
+                            }`}
+                          >
+                            Đổi Quà ➔
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+          </div>
         </section>
 
-        {/* Modal 1: Auth Modal (Login / 3-Step Register Stepper) */}
-        <AnimatePresence>
-          {showAuthModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-card border border-border p-6 md:p-8 rounded-3xl max-w-md w-full shadow-2xl relative overflow-hidden"
-              >
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowAuthModal(false);
-                    resetRegisterFlow();
-                  }}
-                  className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground rounded-full"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-
-                <div className="text-center mb-6 space-y-2">
-                  <div className="w-12 h-12 bg-emerald-500/10 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
-                    {authMode === "login" ? <Lock className="w-6 h-6" /> : <UserCheck className="w-6 h-6" />}
-                  </div>
-                  <h3 className="text-2xl font-black text-foreground">
-                    {authMode === "login" ? "Đăng Nhập Tài Khoản" : "Đăng Ký Tài Khoản Mới"}
-                  </h3>
-                  <p className="text-xs text-muted-foreground">Hệ thống xanh tích điểm và tình nguyện viên CMC</p>
-                </div>
-
-                {/* Auth Mode Toggle Tabs - type="button" FIXED so clicking does not trigger form submit */}
-                <div className="flex bg-secondary p-1 rounded-2xl mb-6">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAuthMode("login");
-                      resetRegisterFlow();
-                    }}
-                    className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${
-                      authMode === 'login' ? 'bg-emerald-600 text-white shadow' : 'text-muted-foreground'
-                    }`}
-                  >
-                    Đăng Nhập
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAuthMode("register");
-                      setAuthStep(1);
-                    }}
-                    className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${
-                      authMode === 'register' ? 'bg-emerald-600 text-white shadow' : 'text-muted-foreground'
-                    }`}
-                  >
-                    Đăng Ký Mới
-                  </button>
-                </div>
-
-                {authMode === "login" ? (
-                  /* Login Form */
-                  <form onSubmit={handleLoginSubmit} className="space-y-4">
-                    <div>
-                      <label className="block text-xs font-bold text-foreground mb-1">Mã Sinh Viên / Email CMC (*)</label>
-                      <div className="relative">
-                        <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                        <input
-                          type="text"
-                          required
-                          placeholder="Ví dụ: CMC-202488 hoặc minhanh@cmc.edu.vn"
-                          value={authStudentId}
-                          onChange={(e) => setAuthStudentId(e.target.value)}
-                          className="w-full pl-9 pr-4 py-2.5 bg-secondary/60 border border-border rounded-xl text-xs outline-none focus:ring-2 focus:ring-emerald-500 text-foreground"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-foreground mb-1">Mật Khẩu (*)</label>
-                      <input
-                        type="password"
-                        required
-                        placeholder="••••••••"
-                        value={authPassword}
-                        onChange={(e) => setAuthPassword(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-secondary/60 border border-border rounded-xl text-xs outline-none focus:ring-2 focus:ring-emerald-500 text-foreground"
-                      />
-                    </div>
-
-                    <button
-                      type="submit"
-                      className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-2xl text-xs transition-all shadow-md mt-2"
-                    >
-                      Xác Nhận Đăng Nhập 🔓
-                    </button>
-                  </form>
-                ) : (
-                  /* 3-Step Stepper Registration Flow */
-                  <div className="space-y-6">
-                    
-                    {/* Symmetrical Premium Stepper Pipeline */}
-                    <div className="relative w-full max-w-sm mx-auto py-2 z-10 px-4">
-                      {/* Background line */}
-                      <div className="absolute top-[26px] left-8 right-8 h-0.5 bg-border z-0" />
-                      
-                      {/* Active progress line */}
-                      <div 
-                        className="absolute top-[26px] left-8 h-0.5 bg-emerald-600 transition-all duration-500 z-0"
-                        style={{ width: `calc(${((authStep - 1) / 2)} * (100% - 64px))` }}
-                      />
-
-                      {/* Symmetrical step nodes */}
-                      <div className="relative flex justify-between z-10">
-                        {[
-                          { step: 1, label: "Liên Hệ" },
-                          { step: 2, label: "Vai Trò" },
-                          { step: 3, label: "Xác Thực" }
-                        ].map((item) => (
-                          <div key={item.step} className="flex flex-col items-center">
-                            <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs border-2 transition-all duration-300 ${
-                              authStep === item.step
-                                ? 'bg-emerald-600 border-emerald-500 text-white shadow-lg ring-4 ring-emerald-500/15'
-                                : authStep > item.step
-                                ? 'bg-emerald-500 border-emerald-400 text-white'
-                                : 'bg-card border-border text-muted-foreground'
-                            }`}>
-                              {authStep > item.step ? <Check className="w-4 h-4" /> : item.step}
-                            </div>
-                            <span className={`text-[10px] font-black uppercase mt-1.5 tracking-wider ${authStep === item.step ? 'text-emerald-600' : 'text-muted-foreground'}`}>
-                              {item.label}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Step 1 Form Content */}
-                    {authStep === 1 && (
-                      <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
-                        <div>
-                          <label className="block text-xs font-bold text-foreground mb-1">Họ và Tên (*)</label>
-                          <div className="relative">
-                            <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                            <input
-                              type="text"
-                              required
-                              placeholder="Ví dụ: Nguyễn Minh Anh"
-                              value={authName}
-                              onChange={(e) => setAuthName(e.target.value)}
-                              className="w-full pl-9 pr-4 py-2.5 bg-secondary/50 border border-border rounded-xl text-xs outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:bg-background transition-all text-foreground font-semibold"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-xs font-bold text-foreground mb-1">Tuổi (*)</label>
-                            <div className="relative">
-                              <Hash className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                              <input
-                                type="number"
-                                min={10}
-                                max={90}
-                                value={authAge}
-                                onChange={(e) => setAuthAge(Number(e.target.value))}
-                                className="w-full pl-9 pr-4 py-2.5 bg-secondary/50 border border-border rounded-xl text-xs outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:bg-background transition-all text-foreground font-semibold"
-                              />
-                            </div>
-                          </div>
-                          <div>
-                            <label className="block text-xs font-bold text-foreground mb-1">Trường Học (*)</label>
-                            <input
-                              type="text"
-                              value={authSchool}
-                              onChange={(e) => setAuthSchool(e.target.value)}
-                              className="w-full px-4 py-2.5 bg-secondary/50 border border-border rounded-xl text-xs outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:bg-background transition-all text-foreground font-semibold"
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-bold text-foreground mb-1 flex items-center gap-1">
-                            <Smartphone className="w-3.5 h-3.5 text-emerald-600" /> Số Điện Thoại (*)
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            maxLength={11}
-                            placeholder="Ví dụ: 0912345678"
-                            value={authPhone}
-                            onChange={(e) => setAuthPhone(e.target.value.replace(/\D/g, ''))}
-                            className="w-full px-4 py-2.5 bg-secondary/50 border border-border rounded-xl text-xs outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:bg-background transition-all text-foreground font-semibold"
-                          />
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (!authName.trim()) {
-                              toast({ title: "Thiếu Họ và Tên ⚠️", description: "Vui lòng nhập họ và tên của bạn.", variant: "destructive" });
-                              return;
-                            }
-                            const cleanPhone = authPhone.replace(/\D/g, '');
-                            if (!cleanPhone || cleanPhone.length < 10 || !cleanPhone.startsWith('0')) {
-                              toast({ 
-                                title: "Số Điện Thoại Không Hợp Lệ ⚠️", 
-                                description: "Vui lòng nhập đúng số điện thoại gồm 10 chữ số bắt đầu bằng 0 (Ví dụ: 0912345678).", 
-                                variant: "destructive" 
-                              });
-                              return;
-                            }
-                            setAuthStep(2);
-                          }}
-                          className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-2xl text-xs transition-all shadow-md flex items-center justify-center gap-1.5"
-                        >
-                          Tiếp Tục Mốc 2 <ArrowRight className="w-4 h-4" />
-                        </button>
-                      </motion.div>
-                    )}
-
-                    {/* Step 2 Form Content */}
-                    {authStep === 2 && (
-                      <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
-                        <div>
-                          <label className="block text-xs font-bold text-foreground mb-1 flex items-center gap-1">
-                            <Hash className="w-3.5 h-3.5 text-emerald-600" /> Mã Sinh Viên / Mã Giáo Viên (*)
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            placeholder="Ví dụ: CMC-251156 hoặc GV-102938"
-                            value={authStudentId}
-                            onChange={(e) => setAuthStudentId(e.target.value)}
-                            className="w-full px-4 py-2.5 bg-secondary/60 border border-border rounded-xl text-xs outline-none focus:ring-2 focus:ring-emerald-500 text-foreground font-semibold"
-                          />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-xs font-bold text-foreground mb-1 flex items-center gap-1">
-                              <GraduationCap className="w-3.5 h-3.5 text-emerald-600" /> Bạn là (*):
-                            </label>
-                            <select
-                              value={authRole}
-                              onChange={(e) => setAuthRole(e.target.value)}
-                              className="w-full px-3 py-2.5 bg-secondary/60 border border-border rounded-xl text-xs outline-none focus:ring-2 focus:ring-emerald-500 text-foreground font-semibold"
-                            >
-                              <option value="student">Học sinh / Sinh viên</option>
-                              <option value="teacher">Giáo viên / Cán bộ nhà trường</option>
-                            </select>
-                          </div>
-
-                          <div>
-                            <label className="block text-xs font-bold text-foreground mb-1 flex items-center gap-1">
-                              <Building className="w-3.5 h-3.5 text-emerald-600" /> Chuyên ngành:
-                            </label>
-                            <select
-                              value={authMajor}
-                              onChange={(e) => setAuthMajor(e.target.value)}
-                              className="w-full px-3 py-2.5 bg-secondary/60 border border-border rounded-xl text-xs outline-none focus:ring-2 focus:ring-emerald-500 text-foreground font-semibold"
-                            >
-                              <option value="Công nghệ Thông tin">CNTT (IT)</option>
-                              <option value="Quản trị Kinh doanh">Quản trị Kinh doanh</option>
-                              <option value="Thiết kế Đồ họa">Thiết kế Đồ họa</option>
-                              <option value="Marketing">Marketing</option>
-                              <option value="Ngôn ngữ Anh">Ngôn ngữ Anh</option>
-                            </select>
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-bold text-foreground mb-1">Chọn vai trò Tình nguyện viên muốn đăng ký (*)</label>
-                          <select
-                            value={authVolunteerRole}
-                            onChange={(e) => setAuthVolunteerRole(e.target.value)}
-                            className="w-full px-4 py-2.5 bg-secondary/60 border border-border rounded-xl text-xs outline-none focus:ring-2 focus:ring-emerald-500 text-foreground font-semibold"
-                          >
-                            <option value="Trực trạm phân loại">Trực trạm phân loại rác thông minh</option>
-                            <option value="Truyền thông xanh">Tuyên truyền & Truyền thông môi trường</option>
-                            <option value="Thu gom vận chuyển">Hỗ trợ đội thu gom chuyên dụng</option>
-                            <option value="Đại sứ EcoValues">Đại sứ xanh tổ chức sự kiện tuần hoàn</option>
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-bold text-foreground mb-1">Mật khẩu tài khoản (*)</label>
-                          <input
-                            type="password"
-                            placeholder="Tối thiểu 8 ký tự (VD: EcoValue2026@)"
-                            value={authPassword}
-                            onChange={(e) => setAuthPassword(e.target.value)}
-                            className="w-full px-4 py-2.5 bg-secondary/60 border border-border rounded-xl text-xs outline-none focus:ring-2 focus:ring-emerald-500 text-foreground"
-                          />
-
-                          {/* Real-time Password Strength Meter */}
-                          {authPassword.length > 0 && (() => {
-                            let score = 0;
-                            if (authPassword.length >= 8) score += 1;
-                            if (/[A-Z]/.test(authPassword)) score += 1;
-                            if (/[a-z]/.test(authPassword)) score += 1;
-                            if (/[0-9]/.test(authPassword) || /[^A-Za-z0-9]/.test(authPassword)) score += 1;
-
-                            const isWeak = authPassword.length < 8 || score < 3;
-                            const isMedium = !isWeak && score === 3;
-                            const isStrong = !isWeak && score >= 4;
-
-                            return (
-                              <div className="space-y-1 pt-1">
-                                <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden flex">
-                                  <div 
-                                    className={`h-full transition-all duration-300 ${isWeak ? 'bg-rose-500 w-1/3' : isMedium ? 'bg-amber-500 w-2/3' : 'bg-emerald-500 w-full'}`} 
-                                  />
-                                </div>
-                                <p className={`text-[11px] font-bold ${isWeak ? 'text-rose-500' : isMedium ? 'text-amber-600' : 'text-emerald-600'}`}>
-                                  {isWeak ? '🔴 Mật khẩu Yếu (Bắt buộc $\\ge 8$ ký tự, bao gồm chữ HOA, chữ thường và số)' : isMedium ? '🟡 Mật khẩu Khá (Khuyên dùng thêm ký tự đặc biệt như @, #, $)' : '🟢 Mật khẩu Rất Mạnh (Đạt tiêu chuẩn an toàn)'}
-                                </p>
-                              </div>
-                            );
-                          })()}
-                        </div>
-
-                        <div className="flex gap-3">
-                          <button
-                            type="button"
-                            onClick={() => setAuthStep(1)}
-                            className="flex-1 py-3 bg-secondary text-foreground font-bold rounded-2xl text-xs border border-border hover:bg-secondary/80 flex items-center justify-center gap-1.5"
-                          >
-                            <ArrowLeft className="w-4 h-4" /> Quay Lại
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (!authPassword || authPassword.length < 8) {
-                                toast({ 
-                                  title: "Mật khẩu quá ngắn ⚠️", 
-                                  description: "Mật khẩu phải có ít nhất 8 ký tự.", 
-                                  variant: "destructive" 
-                                });
-                                return;
-                              }
-                              const hasUpper = /[A-Z]/.test(authPassword);
-                              const hasLower = /[a-z]/.test(authPassword);
-                              const hasDigit = /[0-9]/.test(authPassword);
-                              if (!hasUpper || !hasLower || !hasDigit) {
-                                toast({ 
-                                  title: "Mật khẩu không đủ mạnh 🔐", 
-                                  description: "Mật khẩu bắt buộc phải bao gồm cả chữ HOA, chữ thường và chữ số (Ví dụ: EcoValue2026@).", 
-                                  variant: "destructive" 
-                                });
-                                return;
-                              }
-                              setAuthStep(3);
-                            }}
-                            className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-2xl text-xs transition-all shadow-md flex items-center justify-center gap-1.5"
-                          >
-                            Tiếp Tục <ArrowRight className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </motion.div>
-                    )}
-
-                    {/* Step 3 Form Content: Email & OTP validation */}
-                    {authStep === 3 && (
-                      <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
-                        <div>
-                          <label className="block text-xs font-bold text-foreground mb-1 flex items-center gap-1.5">
-                            <Mail className="w-4 h-4 text-emerald-600" /> Email CMC Nhận OTP (*)
-                          </label>
-                          <div className="flex gap-2">
-                            <input
-                              type="email"
-                              required
-                              placeholder="Ví dụ: sinhvien@cmc.edu.vn"
-                              value={authEmail}
-                              onChange={(e) => setAuthEmail(e.target.value)}
-                              disabled={isOtpSent}
-                              className="flex-1 px-4 py-2.5 bg-secondary/50 border border-border rounded-xl text-xs outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:bg-background transition-all text-foreground disabled:opacity-50"
-                            />
-                            {!isOtpSent ? (
-                              <button
-                                type="button"
-                                onClick={handleSendOtp}
-                                disabled={isSendingOtp}
-                                className="px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-all shadow disabled:opacity-50"
-                              >
-                                {isSendingOtp ? 'Đang gửi...' : 'Gửi OTP'}
-                              </button>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={() => setIsOtpSent(false)}
-                                className="px-3 bg-secondary text-muted-foreground border border-border text-xs rounded-xl font-bold"
-                              >
-                                Sửa
-                              </button>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Dynamic Real Gmail notice */}
-                        {isOtpSent && (
-                          <motion.div 
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="p-4 bg-emerald-500/10 border border-emerald-500/35 rounded-2xl flex flex-col gap-2.5 text-xs text-foreground"
-                          >
-                            <div className="flex items-start gap-2.5">
-                              <Mail className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
-                              <div className="space-y-0.5">
-                                <p className="font-extrabold text-emerald-700">Đã Gửi OTP Đến Gmail Của Bạn ✉️</p>
-                                <p className="text-[11px] text-muted-foreground leading-relaxed">
-                                  Hệ thống đã phát hành mã OTP xác thực 6 số gửi về hòm thư Gmail <strong className="text-foreground">{authEmail}</strong>. Vui lòng kiểm tra Gmail và nhập mã bên dưới.
-                                </p>
-                              </div>
-                            </div>
-                            <div className="flex justify-end pt-1.5 border-t border-emerald-500/20">
-                              <button
-                                type="button"
-                                disabled={isSendingOtp || resendTimer > 0}
-                                onClick={handleSendOtp}
-                                className="text-[11px] font-extrabold text-emerald-700 hover:text-emerald-800 disabled:opacity-50 flex items-center gap-1 transition-colors"
-                              >
-                                <RotateCcw className="w-3 h-3" />
-                                {resendTimer > 0 ? `Gửi lại mã sau (${resendTimer}s)` : "Chưa nhận được? Gửi lại OTP"}
-                              </button>
-                            </div>
-                          </motion.div>
-                        )}
-
-                        {isOtpSent && (
-                          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
-                            <label className="block text-xs font-bold text-foreground mb-1 flex items-center gap-1">
-                              <KeyRound className="w-3.5 h-3.5 text-amber-500" /> Nhập Mã OTP 6 Số (*)
-                            </label>
-                            <input
-                              type="text"
-                              maxLength={6}
-                              placeholder="Nhập 6 số OTP"
-                              value={authOtpInput}
-                              onChange={(e) => setAuthOtpInput(e.target.value)}
-                              className="w-full text-center tracking-widest font-mono font-black text-base px-4 py-2.5 bg-secondary border border-border rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 text-foreground"
-                            />
-                          </motion.div>
-                        )}
-
-                        <div className="flex gap-3 pt-2">
-                          <button
-                            type="button"
-                            onClick={() => setAuthStep(2)}
-                            className="flex-1 py-3 bg-secondary text-foreground font-bold rounded-2xl text-xs border border-border hover:bg-secondary/80 flex items-center justify-center gap-1.5"
-                          >
-                            <ArrowLeft className="w-4 h-4" /> Quay Lại
-                          </button>
-                          
-                          <button
-                            type="button"
-                            onClick={isOtpSent ? handleVerifyAndRegister : handleSendOtp}
-                            className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-2xl text-xs transition-all shadow-md flex items-center justify-center gap-1.5"
-                          >
-                            {isOtpSent ? "Xác Nhận & Đăng Ký" : "Gửi Mã Xác Thực"}
-                          </button>
-                        </div>
-                      </motion.div>
-                    )}
-
-                  </div>
-                )}
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
-
-        {/* Modal 2: Claim Points Modal */}
+        {/* Claim Points Modal */}
         <AnimatePresence>
           {showClaimModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
@@ -1307,106 +692,75 @@ export default function GreenPoints() {
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-card border border-border p-6 md:p-8 rounded-3xl max-w-md w-full shadow-2xl space-y-6 relative"
+                className="bg-card border border-border p-6 md:p-8 rounded-3xl max-w-lg w-full shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto"
               >
-                <button
-                  onClick={() => setShowClaimModal(false)}
-                  className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground rounded-full"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-
-                <div className="text-center space-y-2">
-                  <div className="w-12 h-12 bg-emerald-500/10 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
-                    <PlusCircle className="w-6 h-6" />
+                <div className="flex items-center justify-between border-b border-border pb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 bg-emerald-500/10 text-emerald-600 rounded-xl">
+                      <PlusCircle className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-black text-foreground">Tích Điểm Thu Gom Rác</h3>
+                      <p className="text-xs text-muted-foreground">Tài khoản: <strong>{user?.name}</strong> ({user?.studentId})</p>
+                    </div>
                   </div>
-                  <h3 className="text-2xl font-black text-foreground">Tích Điểm Thu Gom Rác</h3>
-                  <p className="text-xs text-muted-foreground">Tài khoản: <strong>{user?.name}</strong> ({user?.studentId})</p>
+                  <button onClick={() => setShowClaimModal(false)} className="text-muted-foreground hover:text-foreground text-xs font-bold">✖</button>
                 </div>
 
+                {/* Form inputs */}
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs font-bold text-foreground mb-1.5">Loại rác thu gom (*)</label>
+                    <label className="block text-xs font-bold text-foreground mb-1">Loại rác thu gom (*)</label>
                     <select
                       value={itemType}
                       onChange={(e) => setItemType(e.target.value)}
                       className="w-full px-4 py-2.5 bg-secondary border border-border rounded-xl text-xs font-bold text-foreground outline-none focus:ring-2 focus:ring-emerald-500"
                     >
-                      <option value="plastic">Chai Nhựa & Lon Nhôm (+50 pt/món)</option>
-                      <option value="paper">Giấy & Bìa Carton (+40 pt/kg)</option>
-                      <option value="ewaste">Rác Điện Tử & Pin Cũ (+150 pt/món)</option>
-                      <option value="volunteer">Trực trạm / Workshop (+200 pt/h)</option>
+                      <option value="Chai Nhựa & Vỏ Hộp (+15 pt/món)">Chai Nhựa & Vỏ Hộp (+15 pt/món)</option>
+                      <option value="Giấy & Carton (+10 pt/kg)">Giấy & Giấy Carton (+10 pt/kg)</option>
+                      <option value="Kim Loại & Lon Nhôm (+25 pt/món)">Kim Loại & Lon Nhôm (+25 pt/món)</option>
+                      <option value="Rác Điện Tử & Pin Cũ (+40 pt/món)">Rác Điện Tử & Pin Cũ (+40 pt/món)</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-foreground mb-1.5">Số lượng / Khối lượng (*)</label>
+                    <label className="block text-xs font-bold text-foreground mb-1">Số lượng / Khối lượng (*)</label>
                     <input
                       type="number"
                       min={1}
                       max={100}
                       value={quantity}
                       onChange={(e) => setQuantity(Number(e.target.value))}
-                      className="w-full px-4 py-2.5 bg-secondary border border-border rounded-xl text-xs font-mono font-bold text-foreground outline-none focus:ring-2 focus:ring-emerald-500"
+                      className="w-full px-4 py-2.5 bg-secondary border border-border rounded-xl text-xs font-bold text-foreground outline-none focus:ring-2 focus:ring-emerald-500"
                     />
                   </div>
 
-                  {/* Photo Attachment & Camera Capture Section */}
+                  {/* Photo Proof Upload */}
                   <div className="space-y-2">
                     <label className="block text-xs font-bold text-foreground flex items-center justify-between">
-                      <span className="flex items-center gap-1.5">
-                        <Camera className="w-4 h-4 text-emerald-600" /> Tải Ảnh / Chụp Ảnh Minh Chứng (*)
-                      </span>
-                      {proofImage && (
-                        <span className="text-[10px] font-extrabold text-emerald-600 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                          ✓ Đã dính kèm ảnh
-                        </span>
-                      )}
+                      <span>📸 Tải Ảnh / Chụp Ảnh Minh Chứng (*)</span>
+                      {proofImage && <span className="text-emerald-600 text-[10px] font-bold">✓ Đã dính kèm ảnh</span>}
                     </label>
 
-                    {/* Live WebRTC Camera Viewfinder */}
                     {isWebcamActive ? (
-                      <div className="relative rounded-2xl overflow-hidden border-2 border-emerald-500 bg-black text-center p-3 space-y-3 shadow-xl">
-                        <div className="relative rounded-xl overflow-hidden bg-slate-900 max-h-56 flex items-center justify-center border border-emerald-500/30">
-                          <video
-                            ref={videoRef}
-                            autoPlay
-                            playsInline
-                            muted
-                            className="w-full h-48 object-cover rounded-xl"
-                          />
-                          <div className="absolute top-2 left-2 bg-rose-600 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1.5 animate-pulse shadow">
-                            <span className="w-2 h-2 rounded-full bg-white"></span> LIVE CAMERA
-                          </div>
+                      <div className="space-y-2">
+                        <div className="relative rounded-2xl overflow-hidden bg-black border-2 border-emerald-500 aspect-video">
+                          <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
                         </div>
-
                         <div className="flex gap-2">
                           <button
                             type="button"
-                            onClick={handleStopWebcam}
-                            className="flex-1 py-2.5 bg-secondary text-foreground text-xs font-bold rounded-xl border border-border hover:bg-secondary/80 transition-colors"
-                          >
-                            Tắt Camera
-                          </button>
-                          <button
-                            type="button"
                             onClick={handleCapturePhoto}
-                            className="flex-[2] py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-xl shadow-lg flex items-center justify-center gap-1.5 transition-all active:scale-95"
+                            className="flex-1 py-2 bg-emerald-600 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow"
                           >
-                            <Camera className="w-4 h-4" /> Bấm Chụp Ảnh Ngay 📸
+                            <Camera className="w-4 h-4" /> Chụp Ảnh Minh Chứng
                           </button>
-                        </div>
-                      </div>
-                    ) : proofImage ? (
-                      <div className="relative rounded-2xl overflow-hidden border-2 border-emerald-500/40 bg-black/5 group">
-                        <img src={proofImage} alt="Minh chứng sản phẩm" className="w-full h-36 object-cover" />
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                           <button
                             type="button"
-                            onClick={() => setProofImage(null)}
-                            className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow flex items-center gap-1 transition-all"
+                            onClick={handleStopWebcam}
+                            className="px-3 py-2 bg-secondary text-foreground font-bold rounded-xl text-xs border border-border"
                           >
-                            <X className="w-3.5 h-3.5" /> Xóa & Chụp Lại
+                            Hủy
                           </button>
                         </div>
                       </div>
@@ -1415,20 +769,19 @@ export default function GreenPoints() {
                         <button
                           type="button"
                           onClick={handleStartWebcam}
-                          className="flex flex-col items-center justify-center p-3.5 border-2 border-dashed border-emerald-500/40 hover:border-emerald-500 bg-emerald-500/5 hover:bg-emerald-500/10 rounded-2xl cursor-pointer transition-all text-center group"
+                          className="p-3 bg-emerald-500/10 border-2 border-dashed border-emerald-500/40 rounded-2xl text-center hover:bg-emerald-500/20 transition-all flex flex-col items-center justify-center gap-1 cursor-pointer"
                         >
-                          <Camera className="w-6 h-6 text-emerald-600 mb-1 group-hover:scale-110 transition-transform" />
-                          <span className="text-xs font-bold text-foreground">Bật Camera Live</span>
-                          <span className="text-[10px] text-muted-foreground">Chụp bằng Webcam / Cam</span>
+                          <Camera className="w-5 h-5 text-emerald-600" />
+                          <span className="text-xs font-bold text-foreground">Chụp Ảnh Trực Tiếp</span>
                         </button>
 
-                        <label className="flex flex-col items-center justify-center p-3.5 border-2 border-dashed border-border hover:border-emerald-500 bg-secondary/50 hover:bg-secondary rounded-2xl cursor-pointer transition-all text-center group">
-                          <Upload className="w-6 h-6 text-muted-foreground group-hover:text-emerald-600 mb-1 group-hover:scale-110 transition-transform" />
+                        <label className="p-3 bg-secondary/50 border-2 border-dashed border-border rounded-2xl text-center hover:border-emerald-500 transition-all flex flex-col items-center justify-center gap-1 cursor-pointer">
+                          <Upload className="w-5 h-5 text-muted-foreground" />
                           <span className="text-xs font-bold text-foreground">Tải Ảnh Từ Máy</span>
-                          <span className="text-[10px] text-muted-foreground">Chọn file PNG / JPG</span>
                           <input
                             type="file"
                             accept="image/*"
+                            className="hidden"
                             onChange={(e) => {
                               const file = e.target.files?.[0];
                               if (file) {
@@ -1437,44 +790,47 @@ export default function GreenPoints() {
                                 reader.readAsDataURL(file);
                               }
                             }}
-                            className="hidden"
                           />
                         </label>
                       </div>
                     )}
+
+                    {proofImage && !isWebcamActive && (
+                      <div className="relative w-full h-32 rounded-2xl border border-emerald-500 overflow-hidden mt-2">
+                        <img src={proofImage} alt="Proof" className="w-full h-full object-cover" />
+                        <button
+                          onClick={() => setProofImage(null)}
+                          className="absolute top-2 right-2 p-1 bg-rose-500 text-white rounded-full shadow"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    )}
                   </div>
 
-                  <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex justify-between items-center text-xs">
+                  {/* Calculated Estimated Points */}
+                  <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex justify-between items-center text-xs">
                     <span className="font-bold text-foreground">Điểm thưởng ước tính:</span>
-                    <span className="font-black font-mono text-emerald-600 text-lg">
-                      +{quantity * (itemType === 'plastic' ? 50 : itemType === 'paper' ? 40 : itemType === 'ewaste' ? 150 : 200)} pt
+                    <span className="font-black text-emerald-600 font-mono text-base">
+                      +{(itemType.includes("Chai Nhựa") ? 15 : itemType.includes("Giấy") ? 10 : itemType.includes("Kim Loại") ? 25 : 40) * quantity} pt
                     </span>
                   </div>
-
-                  <button
-                    onClick={() => {
-                      if (!proofImage) {
-                        toast({
-                          title: "Thiếu Ảnh Minh Chứng 📸",
-                          description: "Vui lòng chụp ảnh hoặc chọn tải tệp ảnh sản phẩm thu gom để gửi về công ty xác thực.",
-                          variant: "destructive"
-                        });
-                        return;
-                      }
-                      claimMutation.mutate();
-                    }}
-                    disabled={claimMutation.isPending}
-                    className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-2xl text-xs transition-all shadow-md disabled:opacity-50 flex items-center justify-center gap-2 active:scale-95"
-                  >
-                    {claimMutation.isPending ? "Đang Gửi Minh Chứng..." : "Xác Nhận & Gửi Ảnh Thu Gom 🎉"}
-                  </button>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => claimMutation.mutate()}
+                  disabled={claimMutation.isPending}
+                  className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-2xl text-xs shadow-md transition-all active:scale-95 disabled:opacity-50 mt-2"
+                >
+                  {claimMutation.isPending ? "Đang xử lý..." : "Xác Nhận & Gửi Ảnh Thu Gom 🎉"}
+                </button>
               </motion.div>
             </div>
           )}
         </AnimatePresence>
 
-        {/* Modal 3: Redeemed Voucher Code Popup */}
+        {/* Redeemed Voucher Success Dialog */}
         <AnimatePresence>
           {redeemedVoucher && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
@@ -1482,23 +838,20 @@ export default function GreenPoints() {
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-card border border-border p-8 rounded-3xl max-w-sm w-full shadow-2xl text-center space-y-4"
+                className="bg-card border border-border p-6 rounded-3xl max-w-md w-full text-center space-y-4 shadow-2xl"
               >
-                <div className="w-14 h-14 bg-emerald-500/10 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
-                  <Ticket className="w-8 h-8" />
+                <div className="w-16 h-16 bg-emerald-500/10 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
+                  <Gift className="w-8 h-8" />
                 </div>
-
-                <h3 className="text-xl font-black text-foreground">Đổi Quà Thành Công!</h3>
+                <h3 className="text-xl font-black text-foreground">Đổi Quà Thành Công! 🎉</h3>
                 <p className="text-xs text-muted-foreground">{redeemedVoucher.title}</p>
-
-                <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl">
-                  <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Mã Quà Tặng Độc Quyền</p>
-                  <p className="text-2xl font-black font-mono text-emerald-600 mt-1 select-all">{redeemedVoucher.code}</p>
+                <div className="p-4 bg-secondary border border-border rounded-2xl font-mono text-center">
+                  <span className="text-xs text-muted-foreground block mb-1">MÃ VOUCHER CỦA BẠN:</span>
+                  <span className="text-xl font-black text-emerald-600 tracking-widest">{redeemedVoucher.code}</span>
                 </div>
-
                 <button
                   onClick={() => setRedeemedVoucher(null)}
-                  className="w-full py-2.5 bg-emerald-600 text-white font-bold rounded-xl text-xs hover:bg-emerald-700 transition-colors shadow-md"
+                  className="w-full py-3 bg-emerald-600 text-white font-extrabold text-xs rounded-xl shadow"
                 >
                   Hoàn Tất
                 </button>

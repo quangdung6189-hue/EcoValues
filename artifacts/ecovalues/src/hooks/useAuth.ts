@@ -6,6 +6,7 @@ export interface UserProfile {
   studentId: string;
   major: string;
   points: number;
+  avatar?: string;
 }
 
 interface StoredAccount {
@@ -60,36 +61,36 @@ export function useAuth() {
     return !!accounts[cleanEmail];
   }, []);
 
-  // Register new account (Fails if email already exists!)
+  // Register new account (1 per email limit)
   const registerUserAccount = useCallback((
-    name: string, 
-    email: string, 
-    studentId: string, 
-    major: string = "Công nghệ Thông tin",
-    password: string = "",
-    initialPoints: number = 100 // Bronze tier starting points!
-  ): { success: boolean; user?: UserProfile; message?: string } => {
+    name: string,
+    email: string,
+    studentId: string,
+    major: string,
+    passwordHash: string,
+    initialPoints = 100
+  ): { success: boolean; message?: string; user?: UserProfile } => {
     const cleanEmail = email.trim().toLowerCase();
     const accounts = readAccountsMap();
 
     if (accounts[cleanEmail]) {
       return {
         success: false,
-        message: `Email ${cleanEmail} đã được đăng ký tài khoản trước đó! Vui lòng đăng nhập hoặc chọn Quên Mật Khẩu.`
+        message: `Hòm thư Gmail ${cleanEmail} đã tồn tại trong hệ thống. Vui lòng sử dụng Đăng Nhập.`
       };
     }
 
     const newProfile: UserProfile = {
       name,
       email: cleanEmail,
-      studentId,
-      major,
-      points: initialPoints // Start at Bronze Rank (100 pt)
+      studentId: studentId || "CMC-251156",
+      major: major || "Công nghệ Thông tin",
+      points: initialPoints
     };
 
     accounts[cleanEmail] = {
       profile: newProfile,
-      passwordHash: password
+      passwordHash: passwordHash || "123456"
     };
 
     localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
@@ -97,35 +98,29 @@ export function useAuth() {
     setUser(newProfile);
     window.dispatchEvent(new Event(AUTH_EVENT_NAME));
 
-    return { success: true, user: newProfile };
+    return {
+      success: true,
+      user: newProfile
+    };
   }, []);
 
-  // Login existing account
-  const login = useCallback((name: string, email: string, studentId: string, major: string = "Công nghệ Thông tin", points?: number) => {
+  const login = useCallback((
+    name: string, 
+    email: string, 
+    studentId: string, 
+    major = "Sinh viên CMC", 
+    points = 100
+  ) => {
     const cleanEmail = email.trim().toLowerCase();
     const accounts = readAccountsMap();
-    let userPoints = points;
 
+    let profile: UserProfile;
     if (accounts[cleanEmail]) {
-      const stored = accounts[cleanEmail].profile;
-      userPoints = points !== undefined ? points : stored.points;
-    } else if (userPoints === undefined) {
-      userPoints = 100; // Default Bronze tier initial points
+      profile = accounts[cleanEmail].profile;
+    } else {
+      profile = { name, email: cleanEmail, studentId, major, points };
+      accounts[cleanEmail] = { profile, passwordHash: "123456" };
     }
-
-    const profile: UserProfile = {
-      name,
-      email: cleanEmail,
-      studentId,
-      major,
-      points: userPoints
-    };
-
-    // Save/Update account record
-    accounts[cleanEmail] = {
-      profile,
-      passwordHash: accounts[cleanEmail]?.passwordHash || ""
-    };
 
     localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
     localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
@@ -140,7 +135,6 @@ export function useAuth() {
     const accounts = readAccountsMap();
 
     if (!accounts[cleanEmail]) {
-      // If email doesn't exist yet, we still allow resetting to create credentials
       accounts[cleanEmail] = {
         profile: {
           name: "Thành Viên EcoValues",
@@ -175,8 +169,25 @@ export function useAuth() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
       
       const accounts = readAccountsMap();
-      if (accounts[current.email]) {
-        accounts[current.email].profile.points = newPoints;
+      if (accounts[current.email.toLowerCase()]) {
+        accounts[current.email.toLowerCase()].profile.points = newPoints;
+        localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+      }
+
+      setUser(updated);
+      window.dispatchEvent(new Event(AUTH_EVENT_NAME));
+    }
+  }, []);
+
+  const updateUserProfile = useCallback((updates: Partial<UserProfile>) => {
+    const current = readUserFromStorage();
+    if (current) {
+      const updated = { ...current, ...updates };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      
+      const accounts = readAccountsMap();
+      if (accounts[current.email.toLowerCase()]) {
+        accounts[current.email.toLowerCase()].profile = updated;
         localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
       }
 
@@ -191,6 +202,7 @@ export function useAuth() {
     login,
     logout,
     updatePoints,
+    updateUserProfile,
     isEmailRegistered,
     registerUserAccount,
     resetUserPassword

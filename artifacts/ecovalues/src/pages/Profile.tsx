@@ -1,144 +1,62 @@
-import { useState, useRef, useEffect } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link } from "wouter";
 import { 
   User, 
   Award, 
-  Calendar, 
-  Wallet, 
+  Sparkles, 
+  Copy, 
+  Check, 
+  Clock, 
   Gift, 
-  Ticket, 
   Zap, 
   ShieldCheck, 
-  KeyRound, 
-  MapPin, 
-  Bell, 
-  HelpCircle, 
+  LogOut, 
+  Camera, 
   Edit3, 
-  CheckCircle2, 
-  Copy, 
   ChevronRight, 
-  Lock, 
-  LogOut,
-  Sparkles,
-  Flame,
-  Check,
-  RotateCcw,
-  Clock,
-  ArrowUpRight,
-  Upload,
-  Camera,
-  Crown,
-  Trophy,
+  Flame, 
+  Calendar, 
+  CheckCircle2, 
+  X, 
+  Wallet,
+  Lock,
+  Mail,
   Shield,
-  Star,
-  CheckCircle
+  KeyRound,
+  FileCheck,
+  Recycle,
+  Trophy
 } from "lucide-react";
-import { useLocation } from "wouter";
-import { useAuth } from "@/hooks/useAuth";
+import { useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Profile() {
-  const [, setLocation] = useLocation();
-  const { user, isLoggedIn, updatePoints, logout, login } = useAuth();
   const { toast } = useToast();
+  const { user, isLoggedIn, logout, updatePoints, updateUserProfile } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleLogout = () => {
-    logout();
-    toast({
-      title: "Đã Đăng Xuất Thành Công! 🚪",
-      description: "Tài khoản của bạn đã được đăng xuất an toàn.",
-    });
-    setLocation("/tham-gia?mode=login");
-  };
-
-  // Preset Avatar list
-  const PRESET_AVATARS = [
-    { id: 'av-1', name: '🌿 Mầm Xanh', url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80' },
-    { id: 'av-2', name: '🦊 Cáo Eco', url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80' },
-    { id: 'av-3', name: '🦉 Cú Trí Tuệ', url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80' },
-    { id: 'av-4', name: '🐼 Gấu Trúc', url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80' },
-    { id: 'av-5', name: '🐬 Cá Heo', url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80' }
-  ];
-
-  // Custom Avatar state
-  const [avatarUrl, setAvatarUrl] = useState<string>(
-    localStorage.getItem("user_avatar_custom") || PRESET_AVATARS[0].url
-  );
-
-  // Avatar & Profile edit modal
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editName, setEditName] = useState(user?.name || "Đặng Quang Dũng");
-  const [editStudentId, setEditStudentId] = useState(user?.studentId || "CMC-251156");
-
-  // Keep form in sync when logged in user changes
-  useEffect(() => {
-    if (user) {
-      setEditName(user.name);
-      setEditStudentId(user.studentId);
-    }
-  }, [user]);
-
-  // Rank Progress Roadmap Modal
-  const [showRankModal, setShowRankModal] = useState(false);
-
-  // Daily Check-in state persisted per user per date
-  const todayStr = new Date().toISOString().slice(0, 10);
-  const checkInKey = user ? `ecovalues_checkin_${user.email}_${todayStr}` : "";
-
-  const [hasCheckedInToday, setHasCheckedInToday] = useState<boolean>(() => {
-    return checkInKey ? localStorage.getItem(checkInKey) === "true" : false;
-  });
-  const [checkInStreak, setCheckInStreak] = useState(1);
-
-  useEffect(() => {
-    if (checkInKey) {
-      setHasCheckedInToday(localStorage.getItem(checkInKey) === "true");
-    }
-  }, [checkInKey]);
-
-  // Active sub-tab
-  const [activeTab, setActiveTab] = useState<"wallet" | "vouchers" | "privileges" | "security">("wallet");
-
-  // History modal
-  const [showHistoryModal, setShowHistoryModal] = useState(false);
-
-  // Security Change Password state
-  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
-  const [oldPassword, setOldPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-
-  // Address State
-  const [address, setAddress] = useState("Ký túc xá CMC, Số 84 Duy Tân, Cầu Giấy, Hà Nội");
-  const [isEditingAddress, setIsEditingAddress] = useState(false);
-
-  // Notification Toggles
-  const [notifEmail, setNotifEmail] = useState(true);
-  const [notifPush, setNotifPush] = useState(true);
-
-  // Require Login Guard Screen
+  // If user is not logged in, show Auth Gate Notice
   if (!isLoggedIn || !user) {
     return (
       <MainLayout>
-        <div className="min-h-[85vh] flex items-center justify-center p-4 bg-background">
-          <div className="bg-card border border-border p-8 rounded-3xl max-w-md w-full text-center space-y-6 shadow-2xl">
-            <div className="w-20 h-20 bg-emerald-500/10 text-emerald-600 rounded-full flex items-center justify-center mx-auto border border-emerald-500/20 shadow-inner">
-              <Lock className="w-10 h-10" />
+        <div className="bg-background min-h-[80vh] flex items-center justify-center p-4">
+          <div className="bg-card border border-border p-8 rounded-3xl max-w-md w-full text-center space-y-5 shadow-2xl">
+            <div className="w-16 h-16 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center mx-auto">
+              <Lock className="w-8 h-8" />
             </div>
             <div className="space-y-2">
-              <h2 className="text-2xl font-black text-foreground">Yêu Cầu Đăng Nhập</h2>
+              <h2 className="text-2xl font-black text-foreground">Bạn Chưa Đăng Nhập Tài Khoản</h2>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Bạn chưa đăng nhập tài khoản EcoValues. Vui lòng đăng nhập hoặc tạo tài khoản mới để xem trang cá nhân, ví điểm thưởng và bảng tiến trình thăng cấp.
+                Vui lòng đăng nhập hoặc tạo tài khoản sinh viên CMC để truy cập Hồ sơ cá nhân, Ví điểm thưởng và Kho quà tặng.
               </p>
             </div>
-            <Link
-              href="/tham-gia?mode=login"
-              className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-2xl shadow-lg inline-block transition-all active:scale-95"
+            <a 
+              href="/tham-gia?mode=login" 
+              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-extrabold text-xs shadow-lg block transition-all active:scale-95"
             >
-              🔑 Đăng Nhập / Đăng Ký Ngay ➔
-            </Link>
+              🔑 Đăng Nhập Tài Khoản ➔
+            </a>
           </div>
         </div>
       </MainLayout>
@@ -147,43 +65,100 @@ export default function Profile() {
 
   const currentUser = user;
 
-  // Handle Image Upload
+  // Daily Check-in state persisted per user per date
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const checkInKey = user ? `ecovalues_checkin_${user.email}_${todayStr}` : "";
+
+  const [hasCheckedInToday, setHasCheckedInToday] = useState<boolean>(() => {
+    return checkInKey ? localStorage.getItem(checkInKey) === "true" : false;
+  });
+
+  const [checkInStreak, setCheckInStreak] = useState<number>(4);
+
+  // Active Sub-tab inside Profile Page: "wallet" | "recycle_history" | "vouchers" | "privileges" | "security"
+  const [activeTab, setActiveTab] = useState<"wallet" | "recycle_history" | "vouchers" | "privileges" | "security">("wallet");
+
+  // Modals state
+  const [showRankModal, setShowRankModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+
+  // Edit Profile Form state
+  const [editName, setEditName] = useState(currentUser.name);
+  const [editStudentId, setEditStudentId] = useState(currentUser.studentId);
+  const [editMajor, setEditMajor] = useState(currentUser.major);
+  const [avatarUrl, setAvatarUrl] = useState<string>(
+    currentUser.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400"
+  );
+
+  // Copy voucher code state
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
+
+  // User-isolated Transaction History
+  const txKey = `ecovalues_tx_${currentUser.email}`;
+  const [pointTransactions, setPointTransactions] = useState(() => {
+    const saved = localStorage.getItem(txKey);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {}
+    }
+    return [
+      { id: 1, type: "plus", title: "Thưởng thành viên mới (Hạng Đồng)", date: "Hôm nay, 08:00", points: "+100 pt" }
+    ];
+  });
+
+  // User-isolated Vouchers
+  const voucherKey = `ecovalues_vouchers_${currentUser.email}`;
+  const [myVouchers, setMyVouchers] = useState(() => {
+    const saved = localStorage.getItem(voucherKey);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {}
+    }
+    return [];
+  });
+
+  // Handle Logout
+  const handleLogout = () => {
+    logout();
+    toast({
+      title: "Đã Đăng Xuất 👋",
+      description: "Hẹn gặp lại bạn trong các hoạt động tích điểm tiếp theo!",
+    });
+  };
+
+  // Handle Copy Voucher Code
+  const handleCopyCode = (code: string) => {
+    navigator.clipboard.writeText(code);
+    setCopiedCode(code);
+    toast({
+      title: "Đã Mã Quà Tặng! 📋",
+      description: `Đã sao chép mã ${code} vào bộ nhớ tạm.`,
+    });
+    setTimeout(() => setCopiedCode(null), 3000);
+  };
+
+  // Handle Avatar Image Upload
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: "File Quá Lớn ⚠️",
-          description: "Vui lòng chọn ảnh dung lượng dưới 5MB.",
-          variant: "destructive"
-        });
-        return;
-      }
       const reader = new FileReader();
-      reader.onload = (event) => {
-        const result = event.target?.result as string;
+      reader.onloadend = () => {
+        const result = reader.result as string;
         setAvatarUrl(result);
-        localStorage.setItem("user_avatar_custom", result);
+        updateUserProfile({ avatar: result });
         toast({
-          title: "Đã Tải Ảnh Đại Diện Mới! 📸",
-          description: "Ảnh của bạn đã được cập nhật thành công.",
+          title: "Đã Đổi Avatar Mới! ✨",
+          description: "Ảnh đại diện Eco-Avatar đã được cập nhật.",
         });
       };
       reader.readAsDataURL(file);
     }
   };
 
-  // Select Preset Avatar
-  const handleSelectPresetAvatar = (url: string) => {
-    setAvatarUrl(url);
-    localStorage.setItem("user_avatar_custom", url);
-    toast({
-      title: "Đã Đổi Avatar Mới! ✨",
-      description: "Ảnh đại diện Eco-Avatar đã được cập nhật.",
-    });
-  };
-
-  // Daily Check-in Action (Strictly once per day per user account!)
+  // Daily Check-in Action (Double Reward +100 pt!)
   const handleDailyCheckIn = () => {
     if (hasCheckedInToday) {
       toast({
@@ -199,16 +174,16 @@ export default function Profile() {
     setHasCheckedInToday(true);
     setCheckInStreak(prev => prev + 1);
     
-    const newPoints = currentUser.points + 50;
+    const newPoints = currentUser.points + 100;
     updatePoints(newPoints);
 
     // Save transaction to user's private history
     const newTxItem = {
       id: Date.now(),
       type: "plus",
-      title: "Điểm danh hàng ngày",
+      title: "Điểm danh hàng ngày (X2 Bonus)",
       date: "Hôm nay, " + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      points: "+50 pt"
+      points: "+100 pt"
     };
     const updatedTx = [newTxItem, ...pointTransactions];
     setPointTransactions(updatedTx);
@@ -218,98 +193,34 @@ export default function Profile() {
 
     toast({
       title: "Điểm Danh Thành Công! 🎉",
-      description: "Bạn vừa nhận +50 điểm xanh hôm nay. Đã ghi nhận thưởng vào ví!",
+      description: "Bạn vừa nhận +100 điểm xanh hôm nay (Đã tăng gấp đôi thưởng!).",
     });
   };
 
-  // Copy voucher code
-  const handleCopyCode = (code: string) => {
-    navigator.clipboard.writeText(code);
-    toast({
-      title: "Đã Sao Chép Mã! 📋",
-      description: `Mã ${code} đã được lưu vào khay nhớ tạm.`,
-    });
-  };
-
-  // Handle Change Password
-  const handleChangePassword = (e: React.FormEvent) => {
+  // Handle Profile Info Save
+  const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!oldPassword) {
-      toast({ title: "Thiếu mật khẩu cũ", description: "Vui lòng nhập mật khẩu hiện tại.", variant: "destructive" });
-      return;
-    }
-    if (newPassword.length < 8) {
-      toast({ title: "Mật khẩu mới quá ngắn", description: "Mật khẩu mới phải từ 8 ký tự trở lên.", variant: "destructive" });
-      return;
-    }
-    setShowChangePasswordModal(false);
-    setOldPassword("");
-    setNewPassword("");
+    updateUserProfile({
+      name: editName,
+      studentId: editStudentId,
+      major: editMajor,
+    });
+    setShowEditModal(false);
     toast({
-      title: "Đổi Mật Khẩu Thành Công! 🔑",
-      description: "Mật khẩu tài khoản của bạn đã được cập nhật an toàn.",
+      title: "Đã Lưu Hồ Sơ! 📝",
+      description: "Thông tin cá nhân đã được cập nhật thành công.",
     });
   };
 
-  // Per-user Point Transactions History
-  const txKey = currentUser ? `ecovalues_tx_${currentUser.email}` : "";
-  const [pointTransactions, setPointTransactions] = useState<any[]>(() => {
-    if (!txKey) return [];
-    const saved = localStorage.getItem(txKey);
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) {}
-    }
-    return [
-      { id: 1, type: "plus", title: "Thưởng thành viên mới (Hạng Đồng)", date: "Hôm nay", points: "+100 pt" }
-    ];
-  });
-
-  useEffect(() => {
-    if (txKey) {
-      const saved = localStorage.getItem(txKey);
-      if (saved) {
-        try { setPointTransactions(JSON.parse(saved)); } catch (e) {}
-      } else {
-        const initialTx = [
-          { id: 1, type: "plus", title: "Thưởng thành viên mới (Hạng Đồng)", date: "Hôm nay", points: "+100 pt" }
-        ];
-        setPointTransactions(initialTx);
-        localStorage.setItem(txKey, JSON.stringify(initialTx));
-      }
-    }
-  }, [txKey]);
-
-  // Per-user Saved Vouchers List (Empty by default for new accounts!)
-  const voucherKey = currentUser ? `ecovalues_vouchers_${currentUser.email}` : "";
-  const [myVouchers, setMyVouchers] = useState<any[]>(() => {
-    if (!voucherKey) return [];
-    const saved = localStorage.getItem(voucherKey);
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) {}
-    }
-    return [];
-  });
-
-  useEffect(() => {
-    if (voucherKey) {
-      const saved = localStorage.getItem(voucherKey);
-      if (saved) {
-        try { setMyVouchers(JSON.parse(saved)); } catch (e) {}
-      } else {
-        setMyVouchers([]);
-      }
-    }
-  }, [voucherKey]);
-
-  // Membership Tiers Roadmap Data
-  const TIERS = [
+  // 5 Tier Levels Definition for Modal
+  const TIER_LEVELS = [
     {
       name: "Đồng (Bronze)",
       minPoints: 0,
       maxPoints: 499,
       icon: "🥉",
       color: "from-amber-700 to-amber-900",
-      perks: ["Tích điểm chuẩn 1X", "Đổi voucher quà tặng cơ bản"]
+      perks: ["Thưởng +100 pt khởi tạo", "Tham gia tích điểm thu gom rác", "Huy hiệu Đồng khởi đầu"]
     },
     {
       name: "Bạc (Silver)",
@@ -434,7 +345,6 @@ export default function Profile() {
                     {/* Dynamic Waste Contribution Stats */}
                     {(() => {
                       const pts = currentUser.points;
-                      // New accounts with <= 100pt have 0.0kg initial waste
                       const wasteKg = pts <= 100 ? "0.0" : ((pts - 100) * 0.1).toFixed(1);
                       const wasteItems = pts <= 100 ? 0 : Math.floor((pts - 100) / 2);
 
@@ -464,7 +374,7 @@ export default function Profile() {
                 </div>
               </div>
 
-              {/* Dynamic Rank Progress Bar (Clickable to view detailed roadmap) */}
+              {/* Dynamic Rank Progress Bar */}
               {(() => {
                 const pts = currentUser.points;
                 let currentRankName = "Đồng 🥉";
@@ -528,9 +438,9 @@ export default function Profile() {
                       </span>
                       <p className="text-muted-foreground font-medium">
                         {needed > 0 ? (
-                          <>💡 Tích thêm <strong className="text-emerald-600">+{needed.toLocaleString()} pt</strong> nữa để lên Hạng {nextRankName}!</>
+                          <>Cần tích lũy thêm <strong className="text-emerald-600 font-mono">+{needed} pt</strong> để lên hạng tiếp theo</>
                         ) : (
-                          <>🎉 Bạn đã đạt cấp độ thăng hạng tối đa!</>
+                          <>Đã đạt thứ hạng cao nhất!</>
                         )}
                       </p>
                     </div>
@@ -553,7 +463,7 @@ export default function Profile() {
                   <Calendar className="w-6 h-6 text-emerald-600" /> Điểm Danh Hàng Ngày Nhận Quà 📅
                 </h2>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Điểm danh mỗi ngày để tích điểm thưởng và duy trì chuỗi điểm danh xanh
+                  Điểm danh mỗi ngày để tích +100 pt điểm thưởng và duy trì chuỗi điểm danh xanh (X2 Thưởng!)
                 </p>
               </div>
 
@@ -567,9 +477,9 @@ export default function Profile() {
                 }`}
               >
                 {hasCheckedInToday ? (
-                  <> <CheckCircle2 className="w-4 h-4" /> Đã Điểm Danh Hôm Nay (+50 pt) </>
+                  <> <CheckCircle2 className="w-4 h-4" /> Đã Điểm Danh Hôm Nay (+100 pt) </>
                 ) : (
-                  <> <Flame className="w-4 h-4 text-amber-300 animate-bounce" /> Nhận +50 Điểm Hôm Nay! </>
+                  <> <Flame className="w-4 h-4 text-amber-300 animate-bounce" /> Nhận +100 Điểm Hôm Nay! </>
                 )}
               </button>
             </div>
@@ -577,13 +487,13 @@ export default function Profile() {
             {/* 7 Days Streak Calendar Grid */}
             <div className="grid grid-cols-7 gap-2 md:gap-4 pt-2">
               {[
-                { day: "T2", pts: "+50", done: true },
-                { day: "T3", pts: "+50", done: true },
-                { day: "T4", pts: "+50", done: true },
-                { day: "T5", pts: "+50", done: true },
-                { day: "T6 (Hôm nay)", pts: "+50", current: true, done: hasCheckedInToday },
-                { day: "T7", pts: "+50", done: false },
-                { day: "CN 🎉", pts: "+100", done: false, bonus: true },
+                { day: "T2", pts: "+100", done: true },
+                { day: "T3", pts: "+100", done: true },
+                { day: "T4", pts: "+100", done: true },
+                { day: "T5", pts: "+100", done: true },
+                { day: "T6 (Hôm nay)", pts: "+100", current: true, done: hasCheckedInToday },
+                { day: "T7", pts: "+100", done: false },
+                { day: "CN 🎉", pts: "+200", done: false, bonus: true },
               ].map((item, idx) => (
                 <div 
                   key={idx}
@@ -611,14 +521,15 @@ export default function Profile() {
             </div>
           </div>
 
-          {/* 🪪 SECTION 2: SUB-TABS (VÍ ĐIỂM, QUÀ TẶNG, ĐẶC QUYỀN, CÀI ĐẶT) */}
+          {/* 🪪 SECTION 2: SUB-TABS (VÍ ĐIỂM, LỊCH SỬ THU GOM, QUÀ TẶNG, ĐẶC QUYỀN, CÀI ĐẶT) */}
           <div className="space-y-6">
             
             {/* Sub-tabs header */}
             <div className="flex bg-secondary/80 p-1.5 rounded-2xl border border-border overflow-x-auto">
               {[
                 { id: "wallet", label: "Ví Điểm Thưởng", icon: Wallet },
-                { id: "vouchers", label: "Quà Của Tôi (3)", icon: Gift },
+                { id: "recycle_history", label: "Lịch Sử Thu Gom 📅", icon: Recycle },
+                { id: "vouchers", label: `Quà Của Tôi (${myVouchers.length})`, icon: Gift },
                 { id: "privileges", label: "Đặc Quyền Hội Viên", icon: Award },
                 { id: "security", label: "Cài Đặt & Bảo Mật", icon: ShieldCheck }
               ].map((tab) => (
@@ -637,7 +548,7 @@ export default function Profile() {
               ))}
             </div>
 
-            {/* TAB CONTENT: VÍ ĐIỂM THƯỞNG */}
+            {/* TAB CONTENT 1: VÍ ĐIỂM THƯỞNG */}
             {activeTab === "wallet" && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 
@@ -650,14 +561,14 @@ export default function Profile() {
                   </div>
 
                   <div className="space-y-2">
-                    <p className="text-xs text-emerald-100 font-medium">Hội viên hạng Vàng (Giảm 5% giá đổi voucher)</p>
+                    <p className="text-xs text-emerald-100 font-medium">Đặc quyền tích điểm xanh EcoValues</p>
                     <div className="flex gap-2">
-                      <Link 
+                      <a 
                         href="/tich-diem" 
-                        className="flex-1 py-2.5 bg-white text-emerald-800 hover:bg-emerald-50 font-black text-xs rounded-xl text-center shadow transition-all"
+                        className="flex-1 py-2.5 bg-white text-emerald-800 hover:bg-emerald-50 font-black text-xs rounded-xl text-center shadow transition-all block"
                       >
                         Đổi Quà Ngay 🎁
-                      </Link>
+                      </a>
                       <button 
                         onClick={() => setShowHistoryModal(true)}
                         className="px-3 py-2.5 bg-emerald-700/60 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl border border-white/20 transition-all"
@@ -683,7 +594,7 @@ export default function Profile() {
                   </div>
 
                   <div className="space-y-3">
-                    {pointTransactions.map((t) => (
+                    {pointTransactions.map((t: any) => (
                       <div key={t.id} className="p-3 bg-secondary/50 rounded-2xl flex items-center justify-between text-xs">
                         <div className="space-y-0.5">
                           <p className="font-bold text-foreground">{t.title}</p>
@@ -700,39 +611,119 @@ export default function Profile() {
               </motion.div>
             )}
 
-            {/* TAB CONTENT: QUÀ CỦA TÔI */}
-            {activeTab === "vouchers" && (
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {myVouchers.map((v) => (
-                  <div key={v.id} className="bg-card border border-border rounded-3xl p-5 shadow-sm space-y-4 relative overflow-hidden flex flex-col justify-between">
-                    <div className="space-y-2">
-                      <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
-                        <v.icon className="w-5 h-5" />
-                      </div>
-                      <h4 className="font-bold text-foreground text-sm leading-snug">{v.title}</h4>
-                      <p className="text-xs text-muted-foreground">Hạn sử dụng: <strong className="text-foreground">{v.expiry}</strong></p>
-                    </div>
-
-                    <div className="p-3 bg-secondary/80 border border-border rounded-2xl flex items-center justify-between pt-2">
-                      <span className="font-mono font-black text-xs tracking-wider text-emerald-700">{v.code}</span>
-                      <button
-                        onClick={() => handleCopyCode(v.code)}
-                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[11px] font-bold flex items-center gap-1 shadow-sm transition-all"
-                      >
-                        <Copy className="w-3 h-3" /> Copy
-                      </button>
-                    </div>
+            {/* TAB CONTENT 2: LỊCH SỬ THU GOM RÁC HÀNG NGÀY */}
+            {activeTab === "recycle_history" && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-card border border-border rounded-3xl p-6 md:p-8 shadow-sm space-y-6">
+                <div className="flex justify-between items-center border-b border-border pb-4">
+                  <div>
+                    <h3 className="text-lg font-black text-foreground flex items-center gap-2">
+                      <Recycle className="w-5 h-5 text-emerald-600" /> Lịch Sử Tích Điểm Thu Gom Rác Hàng Ngày 📅
+                    </h3>
+                    <p className="text-xs text-muted-foreground pt-0.5">Theo dõi lịch sử phân loại rác AI & các hoạt động điểm danh tích điểm</p>
                   </div>
-                ))}
+                  <a
+                    href="/tich-diem"
+                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm block"
+                  >
+                    + Thu Gom Rác Mới ➔
+                  </a>
+                </div>
+
+                <div className="space-y-3">
+                  {pointTransactions.length > 0 ? (
+                    pointTransactions.map((item: any) => (
+                      <div 
+                        key={item.id}
+                        className="p-4 rounded-2xl border border-border bg-secondary/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-emerald-500/30 transition-all"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${
+                            item.type === 'plus' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-rose-500/10 text-rose-600'
+                          }`}>
+                            {item.type === 'plus' ? <Recycle className="w-5 h-5" /> : <Gift className="w-5 h-5" />}
+                          </div>
+                          <div>
+                            <p className="font-bold text-foreground text-sm">{item.title}</p>
+                            <p className="text-[11px] text-muted-foreground flex items-center gap-2 pt-0.5">
+                              <span>📅 {item.date}</span>
+                              <span className="text-emerald-600 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-md text-[10px]">
+                                ✓ Xác thực AI thành công
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="text-left sm:text-right shrink-0">
+                          <span className={`font-mono font-black text-base block ${
+                            item.type === 'plus' ? 'text-emerald-600' : 'text-rose-500'
+                          }`}>
+                            {item.points}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground font-semibold">Đã ghi sổ cái EcoValues</span>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-8 text-center space-y-3 text-muted-foreground">
+                      <Recycle className="w-10 h-10 mx-auto text-emerald-600/40" />
+                      <p className="text-xs font-bold">Chưa có lịch sử thu gom rác nào</p>
+                    </div>
+                  )}
+                </div>
               </motion.div>
             )}
 
-            {/* TAB CONTENT: ĐẶC QUYỀN HỘI VIÊN */}
+            {/* TAB CONTENT 3: QUÀ CỦA TÔI */}
+            {activeTab === "vouchers" && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {myVouchers.length > 0 ? (
+                  myVouchers.map((v: any) => (
+                    <div key={v.id} className="bg-card border border-border rounded-3xl p-5 shadow-sm space-y-4 relative overflow-hidden flex flex-col justify-between">
+                      <div className="space-y-2">
+                        <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+                          <Gift className="w-5 h-5" />
+                        </div>
+                        <h4 className="font-bold text-foreground text-sm leading-snug">{v.title}</h4>
+                        <p className="text-xs text-muted-foreground">Hạn sử dụng: <strong className="text-foreground">{v.expiry}</strong></p>
+                      </div>
+
+                      <div className="p-3 bg-secondary/80 border border-border rounded-2xl flex items-center justify-between pt-2">
+                        <span className="font-mono font-black text-xs tracking-wider text-emerald-700">{v.code}</span>
+                        <button
+                          onClick={() => handleCopyCode(v.code)}
+                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[11px] font-bold flex items-center gap-1 shadow-sm transition-all"
+                        >
+                          <Copy className="w-3 h-3" /> Copy
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="md:col-span-3 bg-card border border-border rounded-3xl p-12 text-center space-y-4">
+                    <div className="w-14 h-14 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center mx-auto">
+                      <Gift className="w-7 h-7" />
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="font-extrabold text-foreground text-base">Kho Quà Tặng Trống</h4>
+                      <p className="text-xs text-muted-foreground">Bạn chưa đổi phần thưởng nào. Hãy tích điểm rác AI để đổi Voucher nhé!</p>
+                    </div>
+                    <a 
+                      href="/tich-diem" 
+                      className="inline-block px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition-all"
+                    >
+                      🎁 Đổi Quà Ngay ➔
+                    </a>
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {/* TAB CONTENT 4: ĐẶC QUYỀN HỘI VIÊN */}
             {activeTab === "privileges" && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-card border border-border rounded-3xl p-6 md:p-8 shadow-sm space-y-6">
                 <div className="flex justify-between items-center border-b border-border pb-4">
                   <div>
-                    <h3 className="text-lg font-black text-foreground">Bảng Đặc Quyền Hạng Vàng 🥇</h3>
+                    <h3 className="text-lg font-black text-foreground">Bảng Đặc Quyền Tích Điểm Xanh 🏆</h3>
                     <p className="text-xs text-muted-foreground">Các ưu đãi bạn đang được hưởng trên toàn hệ sinh thái CMC</p>
                   </div>
                   <button 
@@ -745,94 +736,181 @@ export default function Profile() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {[
-                    { title: "+20% Điểm Thu Gom", desc: "Tăng 20% số điểm thưởng nhận được khi phân loại rác tại trạm.", icon: Zap },
-                    { title: "Đổi Quà Độc Quyền", desc: "Được quyền đổi các sản phẩm quà tặng giới hạn như Bình nước tre Eco.", icon: Gift },
+                    { title: "Tích Điểm Thu Gom AI", desc: "Nhận điểm thưởng tức thì mỗi khi chụp ảnh phân loại rác thông minh.", icon: Zap },
+                    { title: "Đổi Quà Độc Quyền", desc: "Được quyền đổi các sản phẩm quà tặng giới hạn như Voucher Highlands, Balo tre.", icon: Gift },
                     { title: "Giấy Chứng Nhận Xanh", desc: "Cấp chứng nhận thành viên tích cực đóng góp hoạt động cộng đồng.", icon: Award }
-                  ].map((p, idx) => (
-                    <div key={idx} className="p-4 bg-secondary/50 border border-border rounded-2xl space-y-2">
-                      <p.icon className="w-6 h-6 text-emerald-600" />
-                      <h4 className="font-bold text-foreground text-sm">{p.title}</h4>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{p.desc}</p>
+                  ].map((item, idx) => (
+                    <div key={idx} className="p-5 rounded-2xl border border-border bg-secondary/30 space-y-2">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+                        <item.icon className="w-5 h-5" />
+                      </div>
+                      <h4 className="font-bold text-foreground text-sm">{item.title}</h4>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
                     </div>
                   ))}
                 </div>
               </motion.div>
             )}
 
-            {/* TAB CONTENT: CÀI ĐẶT BẢO MẬT */}
+            {/* TAB CONTENT 5: CÀI ĐẶT & BẢO MẬT */}
             {activeTab === "security" && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-card border border-border rounded-3xl p-6 md:p-8 shadow-sm space-y-6">
-                
-                {/* Security Password */}
-                <div className="flex items-center justify-between border-b border-border pb-4">
-                  <div>
-                    <h4 className="font-bold text-foreground text-sm flex items-center gap-2">
-                      <KeyRound className="w-4 h-4 text-emerald-600" /> Đổi Mật Khẩu Đăng Nhập
-                    </h4>
-                    <p className="text-xs text-muted-foreground">Mật khẩu được mã hóa an toàn đạt chuẩn bảo mật EcoValues</p>
-                  </div>
-                  <button
-                    onClick={() => setShowChangePasswordModal(true)}
-                    className="px-4 py-2 bg-secondary hover:bg-secondary/80 text-foreground text-xs font-bold rounded-xl border border-border"
-                  >
-                    Đổi Mật Khẩu
-                  </button>
+                <div className="border-b border-border pb-4">
+                  <h3 className="text-lg font-black text-foreground">Bảo Mật Tài Khoản 🔒</h3>
+                  <p className="text-xs text-muted-foreground">Quản lý hòm thư Gmail, mã OTP và thông tin cá nhân</p>
                 </div>
 
-                {/* Shipping Address */}
-                <div className="flex items-center justify-between border-b border-border pb-4">
-                  <div className="space-y-1">
-                    <h4 className="font-bold text-foreground text-sm flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-emerald-600" /> Địa Chỉ Nhận Quà Tận Nơi
-                    </h4>
-                    {isEditingAddress ? (
-                      <input 
-                        type="text"
-                        value={address}
-                        onChange={(e) => setAddress(e.target.value)}
-                        className="w-full md:w-96 px-3 py-1.5 bg-background border border-border rounded-xl text-xs font-semibold text-foreground outline-none"
-                      />
-                    ) : (
-                      <p className="text-xs text-muted-foreground">{address}</p>
-                    )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-2xl border border-border bg-secondary/30 space-y-1">
+                    <span className="text-[11px] font-bold text-muted-foreground uppercase">Gmail Đã Xác Thực</span>
+                    <p className="font-bold text-foreground text-sm flex items-center gap-2">
+                      <Mail className="w-4 h-4 text-emerald-600" /> {currentUser.email}
+                    </p>
                   </div>
-                  <button
-                    onClick={() => {
-                      if (isEditingAddress) {
-                        toast({ title: "Đã Lưu Địa Chỉ!", description: "Địa chỉ nhận quà mới đã được lưu." });
-                      }
-                      setIsEditingAddress(!isEditingAddress);
-                    }}
-                    className="px-4 py-2 bg-secondary hover:bg-secondary/80 text-foreground text-xs font-bold rounded-xl border border-border shrink-0"
-                  >
-                    {isEditingAddress ? "Lưu" : "Sửa Địa Chỉ"}
-                  </button>
-                </div>
 
-                {/* Notifications */}
-                <div className="space-y-3">
-                  <h4 className="font-bold text-foreground text-sm flex items-center gap-2">
-                    <Bell className="w-4 h-4 text-emerald-600" /> Cài Đặt Thông Báo
-                  </h4>
-                  <div className="flex items-center justify-between text-xs p-3 bg-secondary/50 rounded-2xl">
-                    <span>Nhận thông báo sự kiện đổi quà qua Gmail ({currentUser.email})</span>
-                    <input 
-                      type="checkbox" 
-                      checked={notifEmail} 
-                      onChange={(e) => setNotifEmail(e.target.checked)}
-                      className="w-4 h-4 accent-emerald-600 cursor-pointer"
-                    />
+                  <div className="p-4 rounded-2xl border border-border bg-secondary/30 space-y-1">
+                    <span className="text-[11px] font-bold text-muted-foreground uppercase">Mã Sinh Viên / Mã Cán Bộ</span>
+                    <p className="font-bold text-foreground text-sm flex items-center gap-2">
+                      <FileCheck className="w-4 h-4 text-emerald-600" /> {currentUser.studentId}
+                    </p>
                   </div>
                 </div>
-
               </motion.div>
             )}
 
           </div>
-
         </section>
 
-        {/* Modal 1: Edit Profile & Change Avatar Modal */}
+        {/* RANK MODAL: 5 TIER LEVELS ROADMAP */}
+        <AnimatePresence>
+          {showRankModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="bg-card border border-border p-6 md:p-8 rounded-3xl max-w-2xl w-full shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto"
+              >
+                <div className="flex items-center justify-between border-b border-border pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 bg-amber-500/10 text-amber-600 rounded-2xl">
+                      <Trophy className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-black text-foreground">Hệ Thống 5 Cấp Độ Thứ Hạng</h3>
+                      <p className="text-xs text-muted-foreground">Tích lũy Điểm Xanh để mở khóa các đặc quyền cao cấp hơn</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => setShowRankModal(false)}
+                    className="p-2 hover:bg-secondary rounded-full text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* Dynamic Current User Rank Card */}
+                {(() => {
+                  const pts = currentUser.points;
+                  let rankName = "🥉 HỘI VIÊN HẠNG ĐỒNG";
+                  let targetPts = 500;
+                  let progress = Math.min(100, Math.round((pts / 500) * 100));
+
+                  if (pts >= 3000) {
+                    rankName = "👑 HỘI VIÊN VIP HUYỀN THOẠI";
+                    targetPts = pts;
+                    progress = 100;
+                  } else if (pts >= 1500) {
+                    rankName = "💎 HỘI VIÊN HẠNG KIM CƯƠNG";
+                    targetPts = 3000;
+                    progress = Math.min(100, Math.round(((pts - 1500) / 1500) * 100));
+                  } else if (pts >= 1000) {
+                    rankName = "🥇 HỘI VIÊN HẠNG VÀNG";
+                    targetPts = 1500;
+                    progress = Math.min(100, Math.round(((pts - 1000) / 500) * 100));
+                  } else if (pts >= 500) {
+                    rankName = "🥈 HỘI VIÊN HẠNG BẠC";
+                    targetPts = 1000;
+                    progress = Math.min(100, Math.round(((pts - 500) / 500) * 100));
+                  }
+
+                  return (
+                    <div className="p-4 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-cyan-500/10 border border-emerald-500/30 rounded-2xl space-y-2">
+                      <div className="flex justify-between items-center text-xs font-bold">
+                        <span className="text-emerald-700 dark:text-emerald-400 font-extrabold">{rankName} - {progress}%</span>
+                        <span className="text-muted-foreground font-mono">{pts.toLocaleString()} / {targetPts.toLocaleString()} pt</span>
+                      </div>
+                      <div className="h-2.5 w-full bg-secondary rounded-full overflow-hidden">
+                        <div className="h-full bg-emerald-600 rounded-full" style={{ width: `${progress}%` }} />
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* 5 Tier Cards Grid */}
+                <div className="space-y-3">
+                  {TIER_LEVELS.map((tier, idx) => {
+                    const pts = currentUser.points;
+                    const isCurrentTier = pts >= tier.minPoints && pts <= tier.maxPoints;
+                    const isNextTier = pts < tier.minPoints && (idx === 0 || pts >= TIER_LEVELS[idx - 1].minPoints);
+
+                    return (
+                      <div 
+                        key={tier.name}
+                        className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+                          isCurrentTier 
+                            ? 'bg-emerald-500/10 border-emerald-500 ring-2 ring-emerald-500/20 shadow-md' 
+                            : isNextTier
+                            ? 'bg-amber-500/5 border-amber-500/50'
+                            : 'bg-secondary/30 border-border opacity-70'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-3xl shrink-0">{tier.icon}</span>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-extrabold text-foreground text-sm">{tier.name}</h4>
+                              {isCurrentTier && (
+                                <span className="px-2 py-0.5 bg-emerald-600 text-white text-[10px] font-black rounded-full uppercase">
+                                  HẠNG HIỆN TẠI
+                                </span>
+                              )}
+                              {isNextTier && (
+                                <span className="px-2 py-0.5 bg-amber-500 text-slate-950 text-[10px] font-black rounded-full uppercase">
+                                  MỤC TIÊU TIẾP THEO
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-emerald-600 font-mono font-bold pt-0.5">
+                              {tier.minPoints.toLocaleString()} - {tier.maxPoints >= 99999 ? "Vô hạn" : tier.maxPoints.toLocaleString()} pt
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="text-xs space-y-1">
+                          {tier.perks.map((perk, i) => (
+                            <p key={i} className="text-muted-foreground flex items-center gap-1.5 text-[11px]">
+                              <Check className="w-3 h-3 text-emerald-600 shrink-0" /> {perk}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <button
+                  onClick={() => setShowRankModal(false)}
+                  className="w-full py-3 bg-secondary hover:bg-secondary/80 text-foreground font-bold text-xs rounded-2xl border border-border"
+                >
+                  Đóng Màn Hình ✖
+                </button>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
+        {/* EDIT PROFILE MODAL */}
         <AnimatePresence>
           {showEditModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
@@ -840,62 +918,17 @@ export default function Profile() {
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-card border border-border p-6 md:p-8 rounded-3xl max-w-lg w-full shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto"
+                className="bg-card border border-border p-6 md:p-8 rounded-3xl max-w-md w-full shadow-2xl space-y-5"
               >
                 <div className="flex items-center justify-between border-b border-border pb-3">
-                  <h3 className="text-xl font-black text-foreground flex items-center gap-2">
-                    <Edit3 className="w-5 h-5 text-emerald-600" /> Chỉnh Sửa Hồ Sơ & Avatar
-                  </h3>
-                  <button onClick={() => setShowEditModal(false)} className="text-xs font-bold text-muted-foreground hover:text-foreground">Đóng ✖</button>
+                  <h3 className="text-lg font-black text-foreground">Chỉnh Sửa Hồ Sơ Cá Nhân</h3>
+                  <button onClick={() => setShowEditModal(false)} className="text-muted-foreground hover:text-foreground text-xs font-bold">✖</button>
                 </div>
 
-                {/* Avatar Change Section */}
-                <div className="space-y-3 bg-secondary/40 p-4 rounded-2xl border border-border">
-                  <label className="block text-xs font-bold text-foreground">Ảnh Đại Diện (Avatar)</label>
-                  
-                  <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-500 overflow-hidden shrink-0">
-                      <img src={avatarUrl} alt="Avatar Preview" className="w-full h-full object-cover" />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow transition-all active:scale-95"
-                      >
-                        <Upload className="w-3.5 h-3.5" /> Tải Ảnh Từ Máy (.jpg, .png)
-                      </button>
-                      <p className="text-[10px] text-muted-foreground">Chấp nhận ảnh dung lượng dưới 5MB</p>
-                    </div>
-                  </div>
-
-                  {/* Preset Eco Avatars */}
-                  <div className="pt-2">
-                    <span className="text-[11px] font-bold text-muted-foreground block mb-2">Hoặc chọn Avatar Bộ sưu tập Eco:</span>
-                    <div className="flex gap-2.5 overflow-x-auto pb-1">
-                      {PRESET_AVATARS.map((item) => (
-                        <button
-                          key={item.id}
-                          type="button"
-                          onClick={() => handleSelectPresetAvatar(item.url)}
-                          className={`w-12 h-12 rounded-full border-2 overflow-hidden shrink-0 transition-all hover:scale-105 ${
-                            avatarUrl === item.url ? 'border-emerald-500 ring-2 ring-emerald-500/30' : 'border-border'
-                          }`}
-                          title={item.name}
-                        >
-                          <img src={item.url} alt={item.name} className="w-full h-full object-cover" />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Form edit name & student ID */}
-                <div className="space-y-4">
+                <form onSubmit={handleSaveProfile} className="space-y-4">
                   <div>
-                    <label className="block text-xs font-bold text-foreground mb-1">Họ và Tên Hiển Thị (*)</label>
-                    <input
+                    <label className="block text-xs font-bold text-foreground mb-1">Họ và Tên</label>
+                    <input 
                       type="text"
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
@@ -904,197 +937,47 @@ export default function Profile() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-foreground mb-1">Mã Sinh Viên / Thẻ Hội Viên (*)</label>
-                    <input
+                    <label className="block text-xs font-bold text-foreground mb-1">Mã Sinh Viên / Cán Bộ</label>
+                    <input 
                       type="text"
                       value={editStudentId}
                       onChange={(e) => setEditStudentId(e.target.value)}
                       className="w-full px-4 py-2.5 bg-secondary border border-border rounded-xl text-xs font-bold text-foreground outline-none focus:ring-2 focus:ring-emerald-500"
                     />
                   </div>
-                </div>
 
-                <div className="flex gap-3 pt-2">
-                  <button
-                    onClick={() => setShowEditModal(false)}
-                    className="flex-1 py-2.5 bg-secondary text-foreground font-bold rounded-xl text-xs border border-border"
-                  >
-                    Hủy
-                  </button>
-                  <button
-                    onClick={() => {
-                      login(editName, currentUser.email, editStudentId, currentUser.major, currentUser.points);
-                      setShowEditModal(false);
-                      toast({ title: "Đã Cập Nhật Hồ Sơ!", description: "Thông tin hồ sơ và ảnh đại diện của bạn đã được lưu thành công." });
-                    }}
-                    className="flex-1 py-2.5 bg-emerald-600 text-white font-bold rounded-xl text-xs hover:bg-emerald-700 shadow-md active:scale-95"
-                  >
-                    Lưu Thay Đổi
-                  </button>
-                </div>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
-
-        {/* Modal 2: Detailed Rank Progress & Roadmap Modal */}
-        <AnimatePresence>
-          {showRankModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-card border border-border p-6 md:p-8 rounded-3xl max-w-xl w-full shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto"
-              >
-                <div className="flex items-center justify-between border-b border-border pb-3">
                   <div>
-                    <h3 className="text-xl font-black text-foreground flex items-center gap-2">
-                      <Trophy className="w-5 h-5 text-amber-500" /> Bảng Tiến Trình Thăng Cấp
-                    </h3>
-                    <p className="text-xs text-muted-foreground">Lộ trình 5 cấp bậc hội viên & đặc quyền tích điểm</p>
+                    <label className="block text-xs font-bold text-foreground mb-1">Chuyên Ngành Học Tập</label>
+                    <input 
+                      type="text"
+                      value={editMajor}
+                      onChange={(e) => setEditMajor(e.target.value)}
+                      className="w-full px-4 py-2.5 bg-secondary border border-border rounded-xl text-xs font-bold text-foreground outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
                   </div>
-                  <button onClick={() => setShowRankModal(false)} className="text-xs font-bold text-muted-foreground hover:text-foreground">Đóng ✖</button>
-                </div>
 
-                {/* Current User Rank Status Banner - 100% Dynamic */}
-                {(() => {
-                  const pts = currentUser.points;
-                  let currentBadge = "🥉 HỘI VIÊN HẠNG ĐỒNG";
-                  let nextRankName = "Bạc 🥈";
-                  let targetPts = 500;
-                  let progress = Math.min(100, Math.round((pts / 500) * 100));
-                  let needed = Math.max(0, 500 - pts);
-
-                  if (pts >= 3000) {
-                    currentBadge = "👑 HỘI VIÊN HUYỀN THOẠI";
-                    nextRankName = "Cấp Tối Đa ✨";
-                    targetPts = pts;
-                    progress = 100;
-                    needed = 0;
-                  } else if (pts >= 1500) {
-                    currentBadge = "💎 HỘI VIÊN KIM CƯƠNG";
-                    nextRankName = "Huyền Thoại 👑";
-                    targetPts = 3000;
-                    progress = Math.min(100, Math.round(((pts - 1500) / 1500) * 100));
-                    needed = 3000 - pts;
-                  } else if (pts >= 1000) {
-                    currentBadge = "🥇 HỘI VIÊN HẠNG VÀNG";
-                    nextRankName = "Kim Cương 💎";
-                    targetPts = 1500;
-                    progress = Math.min(100, Math.round(((pts - 1000) / 500) * 100));
-                    needed = 1500 - pts;
-                  } else if (pts >= 500) {
-                    currentBadge = "🥈 HỘI VIÊN HẠNG BẠC";
-                    nextRankName = "Vàng 🥇";
-                    targetPts = 1000;
-                    progress = Math.min(100, Math.round(((pts - 500) / 500) * 100));
-                    needed = 1000 - pts;
-                  }
-
-                  return (
-                    <div className="p-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl space-y-3 shadow-md">
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs font-bold uppercase tracking-wider text-emerald-100">Hạng Hiện Tại Của Bạn</span>
-                        <span className="px-3 py-1 bg-amber-400 text-amber-950 text-xs font-black rounded-full shadow">
-                          {currentBadge}
-                        </span>
-                      </div>
-                      
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-xs font-bold">
-                          <span>Tiến trình lên {nextRankName}: {progress}%</span>
-                          <span className="font-mono">{pts.toLocaleString()} / {targetPts.toLocaleString()} pt</span>
-                        </div>
-                        <div className="h-2.5 w-full bg-white/20 rounded-full overflow-hidden p-0.5">
-                          <div className="h-full bg-white rounded-full transition-all duration-500" style={{ width: `${progress}%` }} />
-                        </div>
-                      </div>
-                      
-                      <p className="text-[11px] text-emerald-100 font-medium">
-                        {needed > 0 ? (
-                          <>⚡ Bạn chỉ cần tích thêm <strong className="text-white underline">+{needed.toLocaleString()} pt</strong> để mở khóa Hạng {nextRankName}!</>
-                        ) : (
-                          <>🎉 Bạn đang ở cấp bậc cao nhất của hệ sinh thái EcoValues!</>
-                        )}
-                      </p>
-                    </div>
-                  );
-                })()}
-
-                {/* 5 Tiers Detailed Roadmap List */}
-                <div className="space-y-3">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Chi Tiết 5 Cấp Bậc & Đặc Quyền:</h4>
-
-                  {TIERS.map((tier, idx) => {
-                    const pts = currentUser.points;
-                    const isCurrent = pts >= tier.minPoints && pts <= tier.maxPoints;
-                    const isNext = pts < tier.minPoints && (idx === 0 || pts >= TIERS[idx - 1].minPoints);
-
-                    return (
-                      <div 
-                        key={idx}
-                        className={`p-4 rounded-2xl border transition-all ${
-                          isCurrent
-                            ? 'bg-emerald-500/15 border-emerald-500 ring-2 ring-emerald-500/30'
-                            : isNext
-                            ? 'bg-amber-500/10 border-amber-500/40'
-                            : 'bg-secondary/40 border-border opacity-70'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xl">{tier.icon}</span>
-                            <span className="font-black text-sm text-foreground">{tier.name}</span>
-                            {isCurrent && (
-                              <span className="px-2 py-0.5 bg-emerald-600 text-white text-[10px] font-black rounded-md shadow">
-                                HẠNG HIỆN TẠI
-                              </span>
-                            )}
-                            {isNext && (
-                              <span className="px-2 py-0.5 bg-amber-500 text-amber-950 text-[10px] font-black rounded-md animate-pulse">
-                                MỤC TIÊU TIẾP THEO
-                              </span>
-                            )}
-                          </div>
-                          <span className="font-mono text-xs font-extrabold text-muted-foreground">
-                            {tier.minPoints.toLocaleString()} - {tier.maxPoints > 50000 ? "3,000+" : tier.maxPoints.toLocaleString()} pt
-                          </span>
-                        </div>
-
-                        <ul className="space-y-1">
-                          {tier.perks.map((perk, pIdx) => (
-                            <li key={pIdx} className="text-xs text-muted-foreground flex items-center gap-1.5">
-                              <span className="text-emerald-600 font-bold">✓</span> {perk}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div className="pt-2 flex gap-3">
-                  <button
-                    onClick={() => setShowRankModal(false)}
-                    className="flex-1 py-2.5 bg-secondary text-foreground font-bold rounded-xl text-xs border border-border"
-                  >
-                    Đóng Bảng
-                  </button>
-                  <Link
-                    href="/tich-diem"
-                    onClick={() => setShowRankModal(false)}
-                    className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl text-xs text-center shadow-md flex items-center justify-center gap-1 active:scale-95"
-                  >
-                    Tích Điểm Ngay ➔
-                  </Link>
-                </div>
+                  <div className="pt-2 flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowEditModal(false)}
+                      className="flex-1 py-2.5 bg-secondary text-foreground font-bold text-xs rounded-xl border border-border"
+                    >
+                      Hủy
+                    </button>
+                    <button
+                      type="submit"
+                      className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow"
+                    >
+                      Lưu Thay Đổi ➔
+                    </button>
+                  </div>
+                </form>
               </motion.div>
             </div>
           )}
         </AnimatePresence>
 
-        {/* Modal 3: Point History Dialog */}
+        {/* FULL HISTORY MODAL */}
         <AnimatePresence>
           {showHistoryModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
@@ -1102,19 +985,17 @@ export default function Profile() {
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-card border border-border p-6 md:p-8 rounded-3xl max-w-md w-full shadow-2xl space-y-4"
+                className="bg-card border border-border p-6 md:p-8 rounded-3xl max-w-lg w-full shadow-2xl space-y-5 max-h-[85vh] overflow-y-auto"
               >
                 <div className="flex items-center justify-between border-b border-border pb-3">
-                  <h3 className="text-xl font-black text-foreground flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-emerald-600" /> Lịch Sử Tích Điểm
-                  </h3>
-                  <button onClick={() => setShowHistoryModal(false)} className="text-xs font-bold text-muted-foreground">Đóng</button>
+                  <h3 className="text-lg font-black text-foreground">Lịch Sử Biến Động Điểm Thưởng</h3>
+                  <button onClick={() => setShowHistoryModal(false)} className="text-muted-foreground hover:text-foreground text-xs font-bold">✖</button>
                 </div>
 
-                <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
-                  {pointTransactions.map((t) => (
-                    <div key={t.id} className="p-3 bg-secondary/50 rounded-2xl flex items-center justify-between text-xs">
-                      <div>
+                <div className="space-y-3">
+                  {pointTransactions.map((t: any) => (
+                    <div key={t.id} className="p-3.5 bg-secondary/50 rounded-2xl flex items-center justify-between text-xs border border-border/60">
+                      <div className="space-y-0.5">
                         <p className="font-bold text-foreground">{t.title}</p>
                         <p className="text-[10px] text-muted-foreground">{t.date}</p>
                       </div>
@@ -1124,65 +1005,13 @@ export default function Profile() {
                     </div>
                   ))}
                 </div>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
 
-        {/* Modal 4: Change Password Modal */}
-        <AnimatePresence>
-          {showChangePasswordModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-card border border-border p-6 md:p-8 rounded-3xl max-w-md w-full shadow-2xl space-y-4"
-              >
-                <h3 className="text-xl font-black text-foreground flex items-center gap-2">
-                  <KeyRound className="w-5 h-5 text-emerald-600" /> Đổi Mật Khẩu Bảo Mật
-                </h3>
-
-                <form onSubmit={handleChangePassword} className="space-y-3">
-                  <div>
-                    <label className="block text-xs font-bold text-foreground mb-1">Mật khẩu hiện tại (*)</label>
-                    <input
-                      type="password"
-                      required
-                      value={oldPassword}
-                      onChange={(e) => setOldPassword(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-secondary border border-border rounded-xl text-xs font-semibold text-foreground outline-none focus:ring-2 focus:ring-emerald-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-foreground mb-1">Mật khẩu mới (*)</label>
-                    <input
-                      type="password"
-                      required
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="Tối thiểu 8 ký tự (VD: Eco2026@)"
-                      className="w-full px-4 py-2.5 bg-secondary border border-border rounded-xl text-xs font-semibold text-foreground outline-none focus:ring-2 focus:ring-emerald-500"
-                    />
-                  </div>
-
-                  <div className="flex gap-3 pt-2">
-                    <button
-                      type="button"
-                      onClick={() => setShowChangePasswordModal(false)}
-                      className="flex-1 py-2.5 bg-secondary text-foreground font-bold rounded-xl text-xs border border-border"
-                    >
-                      Hủy
-                    </button>
-                    <button
-                      type="submit"
-                      className="flex-1 py-2.5 bg-emerald-600 text-white font-bold rounded-xl text-xs hover:bg-emerald-700 shadow-md"
-                    >
-                      Cập Nhật Mật Khẩu
-                    </button>
-                  </div>
-                </form>
+                <button
+                  onClick={() => setShowHistoryModal(false)}
+                  className="w-full py-2.5 bg-secondary text-foreground font-bold text-xs rounded-xl border border-border"
+                >
+                  Đóng Màn Hình ✖
+                </button>
               </motion.div>
             </div>
           )}
