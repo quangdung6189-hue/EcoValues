@@ -361,38 +361,79 @@ export default function Profile() {
                 </div>
               </div>
 
-              {/* Progress Bar: Up Cấp Kim Cương (Clickable to view detailed roadmap) */}
-              <div 
-                onClick={() => setShowRankModal(true)}
-                className="pt-4 border-t border-border/60 space-y-2 cursor-pointer group hover:bg-secondary/30 p-2.5 rounded-2xl transition-all"
-                title="Nhấp để xem lộ trình thăng cấp chi tiết"
-              >
-                <div className="flex justify-between items-center text-xs font-extrabold">
-                  <span className="text-foreground flex items-center gap-1.5 group-hover:text-emerald-600 transition-colors">
-                    <Zap className="w-4 h-4 text-amber-500 animate-pulse" /> Tiến Trình Up Cấp: <strong className="text-emerald-600 text-sm">83%</strong>
-                  </span>
-                  <span className="text-muted-foreground group-hover:text-foreground transition-colors flex items-center gap-1">
-                    1,250 / 1,500 pt ➔ <strong className="text-cyan-600">Kim Cương 💎</strong>
-                    <ChevronRight className="w-4 h-4 text-emerald-600 group-hover:translate-x-1 transition-transform" />
-                  </span>
-                </div>
-                <div className="h-3 w-full bg-secondary rounded-full overflow-hidden p-0.5 border border-border">
-                  <motion.div 
-                    initial={{ width: 0 }}
-                    animate={{ width: '83%' }}
-                    transition={{ duration: 1 }}
-                    className="h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 rounded-full shadow-md"
-                  />
-                </div>
-                <div className="flex justify-between items-center text-[11px]">
-                  <span className="text-emerald-600 font-bold flex items-center gap-1">
-                    👆 Nhấp vào thanh để xem bảng đặc quyền 5 cấp độ
-                  </span>
-                  <p className="text-muted-foreground font-medium">
-                    💡 Tích thêm <strong className="text-emerald-600">+250 pt</strong> nữa để lên Hạng Kim Cương & X2 Điểm thưởng!
-                  </p>
-                </div>
-              </div>
+              {/* Dynamic Rank Progress Bar (Clickable to view detailed roadmap) */}
+              {(() => {
+                const pts = currentUser.points;
+                let currentRankName = "Đồng 🥉";
+                let nextRankName = "Bạc 🥈";
+                let targetPts = 500;
+                let progress = Math.min(100, Math.round((pts / 500) * 100));
+                let needed = Math.max(0, 500 - pts);
+
+                if (pts >= 3000) {
+                  currentRankName = "Huyền Thoại 👑";
+                  nextRankName = "Cấp Tối Đa ✨";
+                  targetPts = pts;
+                  progress = 100;
+                  needed = 0;
+                } else if (pts >= 1500) {
+                  currentRankName = "Kim Cương 💎";
+                  nextRankName = "Huyền Thoại 👑";
+                  targetPts = 3000;
+                  progress = Math.min(100, Math.round(((pts - 1500) / 1500) * 100));
+                  needed = 3000 - pts;
+                } else if (pts >= 1000) {
+                  currentRankName = "Vàng 🥇";
+                  nextRankName = "Kim Cương 💎";
+                  targetPts = 1500;
+                  progress = Math.min(100, Math.round(((pts - 1000) / 500) * 100));
+                  needed = 1500 - pts;
+                } else if (pts >= 500) {
+                  currentRankName = "Bạc 🥈";
+                  nextRankName = "Vàng 🥇";
+                  targetPts = 1000;
+                  progress = Math.min(100, Math.round(((pts - 500) / 500) * 100));
+                  needed = 1000 - pts;
+                }
+
+                return (
+                  <div 
+                    onClick={() => setShowRankModal(true)}
+                    className="pt-4 border-t border-border/60 space-y-2 cursor-pointer group hover:bg-secondary/30 p-2.5 rounded-2xl transition-all"
+                    title="Nhấp để xem lộ trình thăng cấp chi tiết"
+                  >
+                    <div className="flex justify-between items-center text-xs font-extrabold">
+                      <span className="text-foreground flex items-center gap-1.5 group-hover:text-emerald-600 transition-colors">
+                        <Zap className="w-4 h-4 text-amber-500 animate-pulse" /> Hạng Hiện Tại: <strong className="text-emerald-600 text-sm font-black">{currentRankName}</strong> ({progress}%)
+                      </span>
+                      <span className="text-muted-foreground group-hover:text-foreground transition-colors flex items-center gap-1">
+                        {pts.toLocaleString()} / {targetPts.toLocaleString()} pt ➔ <strong className="text-cyan-600 font-bold">{nextRankName}</strong>
+                        <ChevronRight className="w-4 h-4 text-emerald-600 group-hover:translate-x-1 transition-transform" />
+                      </span>
+                    </div>
+                    <div className="h-3 w-full bg-secondary rounded-full overflow-hidden p-0.5 border border-border">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${progress}%` }}
+                        transition={{ duration: 1 }}
+                        className="h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 rounded-full shadow-md"
+                      />
+                    </div>
+                    <div className="flex justify-between items-center text-[11px]">
+                      <span className="text-emerald-600 font-bold flex items-center gap-1">
+                        👆 Nhấp vào thanh để xem bảng đặc quyền 5 cấp độ
+                      </span>
+                      <p className="text-muted-foreground font-medium">
+                        {needed > 0 ? (
+                          <>💡 Tích thêm <strong className="text-emerald-600">+{needed.toLocaleString()} pt</strong> nữa để lên Hạng {nextRankName}!</>
+                        ) : (
+                          <>🎉 Bạn đã đạt cấp độ thăng hạng tối đa!</>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })()}
 
             </div>
           </div>
