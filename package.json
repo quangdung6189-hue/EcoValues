@@ -1,0 +1,7 @@
+{
+  "name": "ecovalues-root",
+  "private": true,
+  "scripts": {
+    "build": "cd artifacts/ecovalues && npm install && npm run build"
+  }
+}
