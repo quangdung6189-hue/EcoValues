@@ -270,7 +270,7 @@ export default function GreenPoints() {
   // Register final submission
   const handleRegisterSubmit = () => {
     const finalName = authName || "Nguyễn Minh Anh";
-    const finalStudentId = authStudentId || `CMC-${Math.floor(100000 + Math.random() * 900000)}`;
+    const finalStudentId = authStudentId.trim() || (authRole === "teacher" ? `GV-${Math.floor(100000 + Math.random() * 900000)}` : `CMC-${Math.floor(100000 + Math.random() * 900000)}`);
 
     const loggedUser = login(finalName, authEmail, finalStudentId, authMajor, 2450);
     setShowAuthModal(false);
@@ -968,6 +968,20 @@ export default function GreenPoints() {
                     {/* Step 2 Form Content */}
                     {authStep === 2 && (
                       <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
+                        <div>
+                          <label className="block text-xs font-bold text-foreground mb-1 flex items-center gap-1">
+                            <Hash className="w-3.5 h-3.5 text-emerald-600" /> Mã Sinh Viên / Mã Giáo Viên (*)
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="Ví dụ: CMC-251156 hoặc GV-102938"
+                            value={authStudentId}
+                            onChange={(e) => setAuthStudentId(e.target.value)}
+                            className="w-full px-4 py-2.5 bg-secondary/60 border border-border rounded-xl text-xs outline-none focus:ring-2 focus:ring-emerald-500 text-foreground font-semibold"
+                          />
+                        </div>
+
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <label className="block text-xs font-bold text-foreground mb-1 flex items-center gap-1">
@@ -979,7 +993,7 @@ export default function GreenPoints() {
                               className="w-full px-3 py-2.5 bg-secondary/60 border border-border rounded-xl text-xs outline-none focus:ring-2 focus:ring-emerald-500 text-foreground font-semibold"
                             >
                               <option value="student">Học sinh / Sinh viên</option>
-                              <option value="teacher">Giáo viên / Cán bộ</option>
+                              <option value="teacher">Giáo viên / Cán bộ nhà trường</option>
                             </select>
                           </div>
 

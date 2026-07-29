@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
@@ -41,7 +41,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function Profile() {
   const [, setLocation] = useLocation();
-  const { user, isLoggedIn, updatePoints, logout } = useAuth();
+  const { user, isLoggedIn, updatePoints, logout, login } = useAuth();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -70,8 +70,16 @@ export default function Profile() {
 
   // Avatar & Profile edit modal
   const [showEditModal, setShowEditModal] = useState(false);
-  const [editName, setEditName] = useState(user?.name || "Nguyễn Hữu Nghĩa");
+  const [editName, setEditName] = useState(user?.name || "Đặng Quang Dũng");
   const [editStudentId, setEditStudentId] = useState(user?.studentId || "CMC-251156");
+
+  // Keep form in sync when logged in user changes
+  useEffect(() => {
+    if (user) {
+      setEditName(user.name);
+      setEditStudentId(user.studentId);
+    }
+  }, [user]);
 
   // Rank Progress Roadmap Modal
   const [showRankModal, setShowRankModal] = useState(false);
@@ -99,13 +107,13 @@ export default function Profile() {
   const [notifEmail, setNotifEmail] = useState(true);
   const [notifPush, setNotifPush] = useState(true);
 
-  // Default fallback user if not logged in
+  // Dynamic user session
   const currentUser = user || {
-    name: "Nguyễn Hữu Nghĩa",
-    email: "nghia.nh@cmc.edu.vn",
+    name: "Đặng Quang Dũng",
+    email: "ecovalous@gmail.com",
     studentId: "CMC-251156",
     major: "Công nghệ Thông tin",
-    points: 1250,
+    points: 550,
   };
 
   // Handle Image Upload
@@ -751,8 +759,9 @@ export default function Profile() {
                   </button>
                   <button
                     onClick={() => {
+                      login(editName, currentUser.email, editStudentId, currentUser.major, currentUser.points);
                       setShowEditModal(false);
-                      toast({ title: "Đã Cập Nhật Hồ Sơ!", description: "Thông tin hồ sơ và ảnh đại diện đã được lưu thành công." });
+                      toast({ title: "Đã Cập Nhật Hồ Sơ!", description: "Thông tin hồ sơ và ảnh đại diện của bạn đã được lưu thành công." });
                     }}
                     className="flex-1 py-2.5 bg-emerald-600 text-white font-bold rounded-xl text-xs hover:bg-emerald-700 shadow-md active:scale-95"
                   >

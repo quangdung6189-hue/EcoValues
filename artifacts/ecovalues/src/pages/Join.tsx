@@ -106,6 +106,7 @@ export default function Join() {
   // Unified 3-Step Stepper states
   const [authStep, setAuthStep] = useState(1);
   const [fullName, setFullName] = useState("");
+  const [customStudentId, setCustomStudentId] = useState("");
   const [phone, setPhone] = useState("");
   const [age, setAge] = useState(20);
   const [school, setSchool] = useState("Đại học CMC");
@@ -207,7 +208,7 @@ export default function Join() {
     }
 
     setIsSubmitting(true);
-    const studentId = `CMC-${Math.floor(100000 + Math.random() * 900000)}`;
+    const studentId = customStudentId.trim() || (role.includes("Giảng") ? `GV-${Math.floor(100000 + Math.random() * 900000)}` : `CMC-${Math.floor(100000 + Math.random() * 900000)}`);
 
     try {
       try {
@@ -520,6 +521,20 @@ export default function Join() {
                     {/* Step 2: Role, Major, Notes & Password */}
                     {authStep === 2 && (
                       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 pt-2">
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                            <Hash className="w-3.5 h-3.5 text-emerald-600" /> Mã Sinh Viên / Giảng Viên (*)
+                          </label>
+                          <input 
+                            type="text" 
+                            required
+                            value={customStudentId}
+                            onChange={(e) => setCustomStudentId(e.target.value)}
+                            placeholder="Ví dụ: CMC-251156 hoặc GV-102938" 
+                            className="w-full px-4 py-2.5 bg-secondary/50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:bg-background transition-all text-xs font-semibold text-foreground"
+                          />
+                        </div>
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-1.5">
                             <label className="text-xs font-bold text-foreground flex items-center gap-1">
@@ -531,6 +546,7 @@ export default function Join() {
                               className="w-full px-3 py-2.5 bg-secondary/50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:bg-background text-xs font-bold text-foreground"
                             >
                               <option value="Tình nguyện viên">Tình nguyện viên (Sinh viên)</option>
+                              <option value="Giảng viên">Giảng viên / Cán bộ nhà trường</option>
                               <option value="Đối tác xử lý/tái chế">Đối tác xử lý/tái chế</option>
                               <option value="Nhà tài trợ">Nhà tài trợ quà tặng</option>
                             </select>
