@@ -160,20 +160,65 @@ export default function Profile() {
     setTimeout(() => setCopiedCode(null), 3000);
   };
 
-  // Handle Avatar Image Upload (Persisted to localStorage & User Profile state!)
+  // Handle Avatar Image Upload (Persisted to localStorage & User Profile state with Canvas Compression!)
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Định Dạng Không Hợp Lệ ⚠️",
+          description: "Vui lòng chọn một tệp hình ảnh (PNG, JPG, JPEG, WEBP).",
+        });
+        return;
+      }
+
       const reader = new FileReader();
       reader.onloadend = () => {
-        const result = reader.result as string;
-        setAvatarUrl(result);
-        localStorage.setItem(avatarKey, result);
-        updateUserProfile({ avatar: result });
-        toast({
-          title: "Đã Đổi Avatar Mới! ✨",
-          description: "Ảnh đại diện Eco-Avatar đã được lưu trữ vĩnh viễn.",
-        });
+        const rawDataUrl = reader.result as string;
+
+        // Resize and compress image using HTML5 Canvas to prevent localStorage quota error
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const MAX_SIZE = 300;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_SIZE) {
+              height = Math.round((height * MAX_SIZE) / width);
+              width = MAX_SIZE;
+            }
+          } else {
+            if (height > MAX_SIZE) {
+              width = Math.round((width * MAX_SIZE) / height);
+              height = MAX_SIZE;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.85);
+
+            setAvatarUrl(compressedDataUrl);
+            try {
+              localStorage.setItem(avatarKey, compressedDataUrl);
+            } catch (err) {
+              console.warn("localStorage save avatar error:", err);
+            }
+            updateUserProfile({ avatar: compressedDataUrl });
+
+            toast({
+              title: "Đã Đổi Avatar Mới Thành Công! ✨",
+              description: "Ảnh đại diện Eco-Avatar đã được lưu trữ vĩnh viễn.",
+            });
+          }
+        };
+        img.src = rawDataUrl;
       };
       reader.readAsDataURL(file);
     }
@@ -313,9 +358,9 @@ export default function Profile() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        setShowEditModal(true);
+                        fileInputRef.current?.click();
                       }}
-                      title="Đổi Avatar hoặc Chỉnh sửa hồ sơ"
+                      title="Tải ảnh avatar mới từ thiết bị"
                       className="absolute bottom-0 right-0 p-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full shadow-lg border-2 border-card transition-all active:scale-95"
                     >
                       <Camera className="w-4 h-4" />
@@ -1051,6 +1096,20 @@ export default function Profile() {
                 </div>
 
                 <form onSubmit={handleSaveProfile} className="space-y-4">
+                  {/* Quick Avatar Change Box */}
+                  <div className="flex items-center gap-4 p-3 bg-secondary/60 rounded-2xl border border-border">
+                    <img src={avatarUrl} alt="Preview Avatar" className="w-14 h-14 rounded-full object-cover border-2 border-emerald-500 shadow" />
+                    <div className="space-y-1">
+                      <p className="text-xs font-bold text-foreground">Ảnh Đại Diện (Avatar)</p>
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow flex items-center gap-1.5 transition-all active:scale-95"
+                      >
+                        <Camera className="w-3.5 h-3.5" /> 📷 Chọn Ảnh Mới
+                      </button>
+                    </div>
+                  </div>
                   <div>
                     <label className="block text-xs font-bold text-foreground mb-1">Họ và Tên</label>
                     <input 
