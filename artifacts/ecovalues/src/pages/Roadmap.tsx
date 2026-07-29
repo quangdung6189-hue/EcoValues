@@ -1,4 +1,6 @@
+import { Link } from "wouter";
 import { MainLayout } from "@/components/layout/MainLayout";
+import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
 import { Check, Target, Clock, Star } from "lucide-react";
 
@@ -41,6 +43,7 @@ const MILESTONES = [
 ];
 
 export default function Roadmap() {
+  const { isLoggedIn } = useAuth();
   return (
     <MainLayout>
       <section className="py-20 bg-background overflow-hidden">

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "wouter";
 import { MainLayout } from "@/components/layout/MainLayout";
+import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
 import { 
   ArrowRight, 
@@ -108,6 +109,7 @@ const activities = [
 ];
 
 export default function Home() {
+  const { isLoggedIn } = useAuth();
   const [chartMode, setChartMode] = useState<"stacked" | "area">("area");
   const { data: serverStats } = useQuery({
     queryKey: ['/api/stats'],
@@ -185,10 +187,10 @@ export default function Home() {
                 Tìm Trạm Gần Nhất
               </Link>
               <Link 
-                href="/tham-gia" 
+                href={isLoggedIn ? "/ca-nhan" : "/tham-gia"} 
                 className="w-full sm:w-auto inline-flex h-14 items-center justify-center rounded-full bg-white/15 backdrop-blur-md border border-white/30 px-8 text-base font-bold text-white shadow-xl transition-all hover:bg-white/25 hover:scale-105"
               >
-                Trở Thành Tình Nguyện Viên
+                {isLoggedIn ? "👤 Vào Trang Cá Nhân ➔" : "Trở Thành Tình Nguyện Viên"}
               </Link>
             </motion.div>
           </div>
