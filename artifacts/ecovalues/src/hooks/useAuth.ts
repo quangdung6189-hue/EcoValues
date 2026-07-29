@@ -156,6 +156,41 @@ export function useAuth() {
     };
   }, []);
 
+  // Change Password for logged-in user
+  const changePassword = useCallback((
+    email: string,
+    currentPass: string,
+    newPass: string
+  ): { success: boolean; message: string } => {
+    const cleanEmail = email.trim().toLowerCase();
+    const accounts = readAccountsMap();
+
+    if (!accounts[cleanEmail]) {
+      accounts[cleanEmail] = {
+        profile: {
+          name: "Thành Viên EcoValues",
+          email: cleanEmail,
+          studentId: "BIT250098",
+          major: "Công nghệ Thông tin",
+          points: 100
+        },
+        passwordHash: newPass
+      };
+      localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+      return { success: true, message: "Đã cập nhật mật khẩu mới thành công!" };
+    }
+
+    const storedHash = accounts[cleanEmail].passwordHash;
+    if (storedHash && storedHash !== currentPass) {
+      return { success: false, message: "Mật khẩu hiện tại không chính xác. Vui lòng kiểm tra lại!" };
+    }
+
+    accounts[cleanEmail].passwordHash = newPass;
+    localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+
+    return { success: true, message: "Đã cập nhật mật khẩu mới thành công!" };
+  }, []);
+
   const logout = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
     setUser(null);
@@ -205,6 +240,7 @@ export function useAuth() {
     updateUserProfile,
     isEmailRegistered,
     registerUserAccount,
-    resetUserPassword
+    resetUserPassword,
+    changePassword
   };
 }

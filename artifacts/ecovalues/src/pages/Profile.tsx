@@ -33,8 +33,13 @@ import { useAuth } from "@/hooks/useAuth";
 
 export default function Profile() {
   const { toast } = useToast();
-  const { user, isLoggedIn, logout, updatePoints, updateUserProfile } = useAuth();
+  const { user, isLoggedIn, logout, updatePoints, updateUserProfile, changePassword } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Change Password State
+  const [oldPassInput, setOldPassInput] = useState("");
+  const [newPassInput, setNewPassInput] = useState("");
+  const [confirmPassInput, setConfirmPassInput] = useState("");
 
   // If user is not logged in, show Auth Gate Notice
   if (!isLoggedIn || !user) {
@@ -773,7 +778,7 @@ export default function Profile() {
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-card border border-border rounded-3xl p-6 md:p-8 shadow-sm space-y-6">
                 <div className="border-b border-border pb-4">
                   <h3 className="text-lg font-black text-foreground">Bảo Mật Tài Khoản 🔒</h3>
-                  <p className="text-xs text-muted-foreground">Quản lý hòm thư Gmail, mã OTP và thông tin cá nhân</p>
+                  <p className="text-xs text-muted-foreground">Quản lý hòm thư Gmail, mật khẩu tài khoản và thông tin xác thực</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -790,6 +795,110 @@ export default function Profile() {
                       <FileCheck className="w-4 h-4 text-emerald-600" /> {currentUser.studentId}
                     </p>
                   </div>
+                </div>
+
+                {/* 🔑 Change Password Section */}
+                <div className="pt-4 border-t border-border space-y-4">
+                  <div className="flex items-center gap-2">
+                    <KeyRound className="w-5 h-5 text-emerald-600" />
+                    <div>
+                      <h4 className="font-extrabold text-foreground text-sm">Đổi Mật Khẩu Tài Khoản</h4>
+                      <p className="text-xs text-muted-foreground">Thay đổi mật khẩu đăng nhập để bảo vệ thông tin cá nhân</p>
+                    </div>
+                  </div>
+
+                  <form 
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (!oldPassInput) {
+                        toast({
+                          title: "Thiếu Thông Tin ⚠️",
+                          description: "Vui lòng nhập mật khẩu hiện tại.",
+                          variant: "destructive"
+                        });
+                        return;
+                      }
+                      if (newPassInput.length < 6) {
+                        toast({
+                          title: "Mật Khẩu Quá Ngắn ⚠️",
+                          description: "Mật khẩu mới phải có ít nhất 6 ký tự.",
+                          variant: "destructive"
+                        });
+                        return;
+                      }
+                      if (newPassInput !== confirmPassInput) {
+                        toast({
+                          title: "Mật Khẩu Không Trùng Khớp ❌",
+                          description: "Xác nhận mật khẩu mới không đúng.",
+                          variant: "destructive"
+                        });
+                        return;
+                      }
+
+                      const res = changePassword(currentUser.email, oldPassInput, newPassInput);
+                      if (!res.success) {
+                        toast({
+                          title: "Đổi Mật Khẩu Thất Bại ❌",
+                          description: res.message,
+                          variant: "destructive"
+                        });
+                        return;
+                      }
+
+                      setOldPassInput("");
+                      setNewPassInput("");
+                      setConfirmPassInput("");
+
+                      toast({
+                        title: "Đổi Mật Khẩu Thành Công! 🔐🎉",
+                        description: "Mật khẩu mới của bạn đã được cập nhật thành công.",
+                      });
+                    }}
+                    className="space-y-4 max-w-md"
+                  >
+                    <div>
+                      <label className="block text-xs font-bold text-foreground mb-1">Mật khẩu hiện tại (*)</label>
+                      <input
+                        type="password"
+                        required
+                        placeholder="••••••••"
+                        value={oldPassInput}
+                        onChange={(e) => setOldPassInput(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-secondary border border-border rounded-xl text-xs font-bold text-foreground outline-none focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-foreground mb-1">Mật khẩu mới (*)</label>
+                      <input
+                        type="password"
+                        required
+                        placeholder="•••••••• (Tối thiểu 6 ký tự)"
+                        value={newPassInput}
+                        onChange={(e) => setNewPassInput(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-secondary border border-border rounded-xl text-xs font-bold text-foreground outline-none focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-foreground mb-1">Xác nhận mật khẩu mới (*)</label>
+                      <input
+                        type="password"
+                        required
+                        placeholder="••••••••"
+                        value={confirmPassInput}
+                        onChange={(e) => setConfirmPassInput(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-secondary border border-border rounded-xl text-xs font-bold text-foreground outline-none focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-2"
+                    >
+                      <Lock className="w-4 h-4" /> Cập Nhật Mật Khẩu Mới
+                    </button>
+                  </form>
                 </div>
               </motion.div>
             )}
