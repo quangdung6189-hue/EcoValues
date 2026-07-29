@@ -35,13 +35,24 @@ import {
   Star,
   CheckCircle
 } from "lucide-react";
+import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Profile() {
+  const [, setLocation] = useLocation();
   const { user, isLoggedIn, updatePoints, logout } = useAuth();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleLogout = () => {
+    logout();
+    toast({
+      title: "Đã Đăng Xuất Thành Công! 🚪",
+      description: "Tài khoản của bạn đã được đăng xuất an toàn.",
+    });
+    setLocation("/tham-gia?mode=login");
+  };
 
   // Preset Avatar list
   const PRESET_AVATARS = [
@@ -314,7 +325,7 @@ export default function Profile() {
                     <Edit3 className="w-4 h-4 text-emerald-600" /> Chỉnh Sửa Hồ Sơ
                   </button>
                   <button
-                    onClick={logout}
+                    onClick={handleLogout}
                     className="px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 text-xs font-bold rounded-2xl border border-rose-500/20 flex items-center gap-1.5 transition-all active:scale-95"
                   >
                     <LogOut className="w-4 h-4" /> Đăng Xuất
