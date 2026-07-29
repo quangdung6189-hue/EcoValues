@@ -393,19 +393,57 @@ export default function Profile() {
                   <div className="space-y-1">
                     <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                       <h1 className="text-2xl md:text-3xl font-black text-foreground">{currentUser.name}</h1>
-                      <button 
-                        onClick={() => setShowRankModal(true)}
-                        className="px-3 py-1 rounded-full text-xs font-black bg-amber-400/20 hover:bg-amber-400/30 text-amber-600 border border-amber-400/30 flex items-center gap-1 transition-all shadow-sm active:scale-95"
-                      >
-                        <Award className="w-3.5 h-3.5 text-amber-500" /> Hội Viên Hạng Vàng 🥇
-                      </button>
+                      {(() => {
+                        const pts = currentUser.points;
+                        let badgeTitle = "Hội Viên Hạng Đồng 🥉";
+                        let badgeStyle = "bg-amber-700/20 text-amber-800 border-amber-700/30";
+                        let iconColor = "text-amber-700";
+
+                        if (pts >= 3000) {
+                          badgeTitle = "Hội Viên VIP Huyền Thoại 👑";
+                          badgeStyle = "bg-purple-500/20 text-purple-600 border-purple-500/30";
+                          iconColor = "text-purple-500";
+                        } else if (pts >= 1500) {
+                          badgeTitle = "Hội Viên Kim Cương 💎";
+                          badgeStyle = "bg-cyan-500/20 text-cyan-600 border-cyan-500/30";
+                          iconColor = "text-cyan-500";
+                        } else if (pts >= 1000) {
+                          badgeTitle = "Hội Viên Hạng Vàng 🥇";
+                          badgeStyle = "bg-amber-400/20 text-amber-600 border-amber-400/30";
+                          iconColor = "text-amber-500";
+                        } else if (pts >= 500) {
+                          badgeTitle = "Hội Viên Hạng Bạc 🥈";
+                          badgeStyle = "bg-slate-400/20 text-slate-600 border-slate-400/30";
+                          iconColor = "text-slate-500";
+                        }
+
+                        return (
+                          <button 
+                            onClick={() => setShowRankModal(true)}
+                            className={`px-3 py-1 rounded-full text-xs font-black border flex items-center gap-1 transition-all shadow-sm active:scale-95 ${badgeStyle}`}
+                          >
+                            <Award className={`w-3.5 h-3.5 ${iconColor}`} /> {badgeTitle}
+                          </button>
+                        );
+                      })()}
                     </div>
                     <p className="text-xs text-muted-foreground font-semibold">
                       Mã SV: <strong className="text-foreground">{currentUser.studentId}</strong> | Chuyên ngành: <strong className="text-foreground">{currentUser.major}</strong>
                     </p>
-                    <p className="text-xs text-emerald-600 font-bold flex items-center justify-center sm:justify-start gap-1 pt-0.5">
-                      ♻️ Đã đóng góp: <span className="underline">45.2 kg rác AI</span> (142 chai nhựa & carton)
-                    </p>
+
+                    {/* Dynamic Waste Contribution Stats */}
+                    {(() => {
+                      const pts = currentUser.points;
+                      // New accounts with <= 100pt have 0.0kg initial waste
+                      const wasteKg = pts <= 100 ? "0.0" : ((pts - 100) * 0.1).toFixed(1);
+                      const wasteItems = pts <= 100 ? 0 : Math.floor((pts - 100) / 2);
+
+                      return (
+                        <p className="text-xs text-emerald-600 font-bold flex items-center justify-center sm:justify-start gap-1 pt-0.5">
+                          ♻️ Đã đóng góp: <span className="underline">{wasteKg} kg rác AI</span> ({wasteItems} chai nhựa & carton)
+                        </p>
+                      );
+                    })()}
                   </div>
                 </div>
 
