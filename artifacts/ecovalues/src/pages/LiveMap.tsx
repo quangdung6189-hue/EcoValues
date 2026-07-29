@@ -443,17 +443,24 @@ export default function LiveMap() {
 
       const markerHtml = `
         <div class="relative flex items-center justify-center cursor-pointer group">
-          ${isFull ? '<div class="absolute -inset-2 rounded-full bg-rose-500/50 animate-ping"></div>' : ''}
-          <div class="px-3 py-1.5 rounded-full font-extrabold text-[11px] shadow-lg flex items-center gap-1.5 transition-all transform group-hover:scale-110 group-hover:z-50 whitespace-nowrap ${
+          <!-- Pulsing wave ring -->
+          ${isFull ? '<div class="absolute -inset-3 rounded-full bg-rose-500/50 animate-ping"></div>' : '<div class="absolute -inset-2 rounded-full bg-emerald-500/30 animate-pulse"></div>'}
+          
+          <!-- Compact Circular Glowing Dot Icon -->
+          <div class="w-8 h-8 rounded-full font-black text-[11px] flex items-center justify-center shadow-xl border-2 border-white transition-all transform group-hover:scale-125 z-20 ${
             isSelected 
-              ? 'bg-emerald-600 text-white ring-4 ring-emerald-400/80 scale-110 z-50 shadow-emerald-500/50 border-2 border-white' 
+              ? 'bg-emerald-600 text-white ring-4 ring-emerald-400/80 scale-110 shadow-emerald-500/60' 
               : isFull 
-              ? 'bg-rose-600 text-white border border-white' 
-              : 'bg-emerald-800/90 text-white border border-white/80 backdrop-blur-sm'
+              ? 'bg-rose-600 text-white shadow-rose-500/50' 
+              : 'bg-emerald-700 text-white shadow-emerald-600/40'
           }">
-            <span class="w-2.5 h-2.5 rounded-full ${isFull ? 'bg-amber-300 animate-pulse' : 'bg-emerald-300'}"></span>
+            <span class="font-mono font-bold">${station.capacity}%</span>
+          </div>
+
+          <!-- Station Name Label Banner (ONLY SHOWN ON HOVER OR WHEN SELECTED) -->
+          <div class="absolute bottom-10 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 ${isSelected ? 'opacity-100' : ''} transition-all duration-200 pointer-events-none z-50 whitespace-nowrap bg-emerald-950/95 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-2xl border border-emerald-400/40 backdrop-blur-md flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full ${isFull ? 'bg-rose-400 animate-ping' : 'bg-emerald-400'}"></span>
             <span>${station.name}</span>
-            <span class="bg-black/40 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold">${station.capacity}%</span>
           </div>
         </div>
       `;
@@ -461,8 +468,8 @@ export default function LiveMap() {
       const customIcon = L.divIcon({
         html: markerHtml,
         className: 'custom-leaflet-marker',
-        iconSize: [140, 30],
-        iconAnchor: [70, 15],
+        iconSize: [32, 32],
+        iconAnchor: [16, 16],
       });
 
       const marker = L.marker([station.lat, station.lng], { icon: customIcon }).addTo(map);
