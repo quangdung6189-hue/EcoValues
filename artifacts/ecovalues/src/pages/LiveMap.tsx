@@ -276,11 +276,11 @@ export default function LiveMap() {
       }
 
       const userIconHtml = `
-        <div class="relative flex items-center justify-center">
-          <div class="absolute -inset-4 rounded-full bg-blue-500/40 animate-ping"></div>
-          <div class="px-3 py-1 bg-blue-600 text-white font-black text-xs rounded-full shadow-2xl border-2 border-white flex items-center gap-1.5 z-50">
-            <span class="w-2 h-2 rounded-full bg-cyan-300 animate-pulse"></span>
-            <span>Vị Trí Của Bạn</span>
+        <div class="relative flex items-center justify-center cursor-pointer group">
+          <div class="absolute -inset-3 rounded-full bg-blue-500/40 animate-ping"></div>
+          <div class="absolute -inset-1 rounded-full bg-blue-400/60 animate-pulse"></div>
+          <div class="w-6 h-6 rounded-full bg-gradient-to-tr from-blue-700 via-blue-500 to-cyan-300 border-2 border-white shadow-xl shadow-blue-500/60 flex items-center justify-center z-10 transition-transform group-hover:scale-125">
+            <span class="w-2 h-2 rounded-full bg-white shadow-inner animate-pulse"></span>
           </div>
         </div>
       `;
@@ -288,11 +288,12 @@ export default function LiveMap() {
       const customUserIcon = L.divIcon({
         html: userIconHtml,
         className: 'custom-user-marker',
-        iconSize: [120, 32],
-        iconAnchor: [60, 16]
+        iconSize: [28, 28],
+        iconAnchor: [14, 14]
       });
 
       userMarkerRef.current = L.marker([uLat, uLng], { icon: customUserIcon }).addTo(map);
+      userMarkerRef.current.bindTooltip("📍 Vị Trí Của Bạn (GPS)", { direction: 'top', offset: [0, -12] });
       map.flyTo([uLat, uLng], 17, { duration: 1 });
     }
 
