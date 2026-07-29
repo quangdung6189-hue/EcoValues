@@ -27,7 +27,7 @@ import {
   Recycle,
   Trophy
 } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -87,9 +87,22 @@ export default function Profile() {
   const [editName, setEditName] = useState(currentUser.name);
   const [editStudentId, setEditStudentId] = useState(currentUser.studentId);
   const [editMajor, setEditMajor] = useState(currentUser.major);
-  const [avatarUrl, setAvatarUrl] = useState<string>(
-    currentUser.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400"
-  );
+
+  // Persistent Avatar State per User Account
+  const avatarKey = `ecovalues_avatar_${currentUser.email}`;
+  const [avatarUrl, setAvatarUrl] = useState<string>(() => {
+    const saved = localStorage.getItem(avatarKey);
+    return saved || currentUser.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400";
+  });
+
+  useEffect(() => {
+    const saved = localStorage.getItem(avatarKey);
+    if (saved) {
+      setAvatarUrl(saved);
+    } else if (currentUser.avatar) {
+      setAvatarUrl(currentUser.avatar);
+    }
+  }, [currentUser.email, currentUser.avatar, avatarKey]);
 
   // Copy voucher code state
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
@@ -140,7 +153,7 @@ export default function Profile() {
     setTimeout(() => setCopiedCode(null), 3000);
   };
 
-  // Handle Avatar Image Upload
+  // Handle Avatar Image Upload (Persisted to localStorage & User Profile state!)
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -148,10 +161,11 @@ export default function Profile() {
       reader.onloadend = () => {
         const result = reader.result as string;
         setAvatarUrl(result);
+        localStorage.setItem(avatarKey, result);
         updateUserProfile({ avatar: result });
         toast({
           title: "Đã Đổi Avatar Mới! ✨",
-          description: "Ảnh đại diện Eco-Avatar đã được cập nhật.",
+          description: "Ảnh đại diện Eco-Avatar đã được lưu trữ vĩnh viễn.",
         });
       };
       reader.readAsDataURL(file);
