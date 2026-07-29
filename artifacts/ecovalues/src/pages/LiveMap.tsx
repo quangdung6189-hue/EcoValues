@@ -906,21 +906,56 @@ export default function LiveMap() {
                 <h3 className="font-bold text-lg text-foreground flex items-center gap-2">
                   <TrendingUp className="w-5 h-5 text-emerald-600" /> Nhật Ký Hoạt Động Trực Tuyến
                 </h3>
-                <span className="text-xs text-muted-foreground font-mono">Cập nhật liên tục</span>
+                <span className="text-xs text-muted-foreground font-mono">Cập nhật liên tục ⚡</span>
               </div>
 
               <div className="divide-y divide-border/60">
-                {RECENT_LOGS.map((log) => (
-                  <div key={log.id} className="py-3 flex items-center justify-between gap-4 first:pt-0 last:pb-0">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
-                        <log.icon className="w-5 h-5" />
+                {(() => {
+                  const fullStations = localStations.filter(s => s.capacity >= 85);
+                  const activeStations = localStations.filter(s => s.capacity < 85);
+
+                  const dynamicLogs = [];
+                  if (fullStations.length > 0) {
+                    dynamicLogs.push({
+                      id: 1,
+                      text: `${fullStations[0].name} (${fullStations[0].campus === 'CS2' ? 'Hà Đông' : 'Duy Tân'}) phát tín hiệu cảnh báo sức chứa ${fullStations[0].capacity}%`,
+                      time: "15 phút trước",
+                      icon: AlertTriangle
+                    });
+                  }
+                  if (fullStations.length > 1) {
+                    dynamicLogs.push({
+                      id: 2,
+                      text: `${fullStations[1].name} (${fullStations[1].campus === 'CS2' ? 'Hà Đông' : 'Duy Tân'}) phát tín hiệu cảnh báo sức chứa ${fullStations[1].capacity}%`,
+                      time: "30 phút trước",
+                      icon: AlertTriangle
+                    });
+                  }
+                  dynamicLogs.push({
+                    id: 3,
+                    text: `Sinh viên Nguyễn Minh Anh vừa phân loại 15 chai nhựa tại ${activeStations[0]?.name || "Trạm Thư Viện CS2"}`,
+                    time: "2 phút trước",
+                    icon: Recycle
+                  });
+                  dynamicLogs.push({
+                    id: 4,
+                    text: `Đội vệ sinh đã hoàn tất dọn dẹp và thu gom rác tại ${activeStations[1]?.name || "Trạm Ký Túc Xá CS2"}`,
+                    time: "45 phút trước",
+                    icon: Truck
+                  });
+
+                  return dynamicLogs.map((log) => (
+                    <div key={log.id} className="py-3 flex items-center justify-between gap-4 first:pt-0 last:pb-0">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
+                          <log.icon className="w-5 h-5" />
+                        </div>
+                        <p className="text-xs md:text-sm font-medium text-foreground">{log.text}</p>
                       </div>
-                      <p className="text-xs md:text-sm font-medium text-foreground">{log.text}</p>
+                      <span className="text-[11px] text-muted-foreground font-mono whitespace-nowrap">{log.time}</span>
                     </div>
-                    <span className="text-[11px] text-muted-foreground font-mono whitespace-nowrap">{log.time}</span>
-                  </div>
-                ))}
+                  ));
+                })()}
               </div>
             </div>
 
