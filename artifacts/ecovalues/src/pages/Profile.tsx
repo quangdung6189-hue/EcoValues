@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
@@ -26,7 +26,14 @@ import {
   Check,
   RotateCcw,
   Clock,
-  ArrowUpRight
+  ArrowUpRight,
+  Upload,
+  Camera,
+  Crown,
+  Trophy,
+  Shield,
+  Star,
+  CheckCircle
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -34,15 +41,33 @@ import { useToast } from "@/hooks/use-toast";
 export default function Profile() {
   const { user, isLoggedIn, updatePoints, logout } = useAuth();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Preset Avatar list
+  const PRESET_AVATARS = [
+    { id: 'av-1', name: '🌿 Mầm Xanh', url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80' },
+    { id: 'av-2', name: '🦊 Cáo Eco', url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80' },
+    { id: 'av-3', name: '🦉 Cú Trí Tuệ', url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80' },
+    { id: 'av-4', name: '🐼 Gấu Trúc', url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80' },
+    { id: 'av-5', name: '🐬 Cá Heo', url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80' }
+  ];
+
+  // Custom Avatar state
+  const [avatarUrl, setAvatarUrl] = useState<string>(
+    localStorage.getItem("user_avatar_custom") || PRESET_AVATARS[0].url
+  );
 
   // Avatar & Profile edit modal
   const [showEditModal, setShowEditModal] = useState(false);
-  const [editName, setEditName] = useState(user?.name || "Nguyễn Văn A");
-  const [editStudentId, setEditStudentId] = useState(user?.studentId || "CMC-125323");
+  const [editName, setEditName] = useState(user?.name || "Nguyễn Hữu Nghĩa");
+  const [editStudentId, setEditStudentId] = useState(user?.studentId || "CMC-251156");
+
+  // Rank Progress Roadmap Modal
+  const [showRankModal, setShowRankModal] = useState(false);
 
   // Daily Check-in state
   const [hasCheckedInToday, setHasCheckedInToday] = useState(false);
-  const [checkInStreak, setCheckInStreak] = useState(4); // 4 days streak
+  const [checkInStreak, setCheckInStreak] = useState(4);
 
   // Active sub-tab
   const [activeTab, setActiveTab] = useState<"wallet" | "vouchers" | "privileges" | "security">("wallet");
@@ -65,11 +90,47 @@ export default function Profile() {
 
   // Default fallback user if not logged in
   const currentUser = user || {
-    name: "Nguyễn Văn A",
-    email: "nguyenvana@cmc.edu.vn",
-    studentId: "CMC-125323",
+    name: "Nguyễn Hữu Nghĩa",
+    email: "nghia.nh@cmc.edu.vn",
+    studentId: "CMC-251156",
     major: "Công nghệ Thông tin",
     points: 1250,
+  };
+
+  // Handle Image Upload
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File Quá Lớn ⚠️",
+          description: "Vui lòng chọn ảnh dung lượng dưới 5MB.",
+          variant: "destructive"
+        });
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const result = event.target?.result as string;
+        setAvatarUrl(result);
+        localStorage.setItem("user_avatar_custom", result);
+        toast({
+          title: "Đã Tải Ảnh Đại Diện Mới! 📸",
+          description: "Ảnh của bạn đã được cập nhật thành công.",
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Select Preset Avatar
+  const handleSelectPresetAvatar = (url: string) => {
+    setAvatarUrl(url);
+    localStorage.setItem("user_avatar_custom", url);
+    toast({
+      title: "Đã Đổi Avatar Mới! ✨",
+      description: "Ảnh đại diện Eco-Avatar đã được cập nhật.",
+    });
   };
 
   // Daily Check-in Action
@@ -134,10 +195,65 @@ export default function Profile() {
     { id: 4, type: "plus", title: "Thưởng chuỗi 7 ngày xanh", date: "20/07/2026", points: "+150 pt" },
   ];
 
+  // Membership Tiers Roadmap Data
+  const TIERS = [
+    {
+      name: "Đồng (Bronze)",
+      minPoints: 0,
+      maxPoints: 499,
+      icon: "🥉",
+      color: "from-amber-700 to-amber-900",
+      perks: ["Tích điểm chuẩn 1X", "Đổi voucher quà tặng cơ bản"]
+    },
+    {
+      name: "Bạc (Silver)",
+      minPoints: 500,
+      maxPoints: 999,
+      icon: "🥈",
+      color: "from-slate-400 to-slate-600",
+      perks: ["Tích điểm +10%", "Giảm 5% giá đổi quà tặng", "Huy hiệu Bạc sinh thái"]
+    },
+    {
+      name: "Vàng (Gold)",
+      minPoints: 1000,
+      maxPoints: 1499,
+      icon: "🥇",
+      color: "from-amber-400 to-yellow-600",
+      isCurrent: true,
+      perks: ["Tích điểm +20%", "Nhận Giấy chứng nhận Tình nguyện viên", "Đổi bình nước tre Eco cao cấp"]
+    },
+    {
+      name: "Kim Cương (Diamond)",
+      minPoints: 1500,
+      maxPoints: 2999,
+      icon: "💎",
+      color: "from-cyan-400 to-emerald-600",
+      isNext: true,
+      perks: ["X2 Điểm thưởng thu gom", "Miễn phí ship quà tặng tận nơi", "Thiệp & quà sinh nhật Đại sứ"]
+    },
+    {
+      name: "Huyền Thoại (Legend)",
+      minPoints: 3000,
+      maxPoints: 99999,
+      icon: "👑",
+      color: "from-purple-500 to-indigo-700",
+      perks: ["Huy hiệu Vàng vĩnh viễn", "Vé mời VIP Gala Đại sứ Xanh", "Vinh danh Top 10 Campus CMC"]
+    }
+  ];
+
   return (
     <MainLayout>
       <div className="bg-background min-h-screen pb-24">
         
+        {/* Hidden File Input for Avatar Upload */}
+        <input 
+          type="file" 
+          ref={fileInputRef}
+          accept="image/*"
+          className="hidden"
+          onChange={handleImageUpload}
+        />
+
         {/* Header Profile Hero Banner */}
         <section className="bg-gradient-to-b from-emerald-900 via-emerald-800 to-background pt-28 pb-12 relative overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:24px_24px] opacity-15 pointer-events-none" />
@@ -150,27 +266,35 @@ export default function Profile() {
                 
                 {/* Left: Avatar & Name */}
                 <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
-                  <div className="relative group">
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-emerald-400 via-teal-500 to-emerald-700 p-1 shadow-xl">
-                      <div className="w-full h-full rounded-full bg-card flex items-center justify-center overflow-hidden">
-                        <User className="w-12 h-12 text-emerald-600" />
-                      </div>
+                  <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-emerald-400 via-teal-500 to-emerald-700 p-1 shadow-xl relative overflow-hidden">
+                      <img 
+                        src={avatarUrl} 
+                        alt="User Avatar" 
+                        className="w-full h-full rounded-full object-cover"
+                      />
                     </div>
                     <button
-                      onClick={() => setShowEditModal(true)}
-                      title="Chỉnh sửa thông tin"
-                      className="absolute bottom-0 right-0 p-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full shadow-lg border-2 border-card transition-all"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowEditModal(true);
+                      }}
+                      title="Đổi Avatar hoặc Chỉnh sửa hồ sơ"
+                      className="absolute bottom-0 right-0 p-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full shadow-lg border-2 border-card transition-all active:scale-95"
                     >
-                      <Edit3 className="w-3.5 h-3.5" />
+                      <Camera className="w-4 h-4" />
                     </button>
                   </div>
 
                   <div className="space-y-1">
                     <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                       <h1 className="text-2xl md:text-3xl font-black text-foreground">{currentUser.name}</h1>
-                      <span className="px-3 py-0.5 rounded-full text-xs font-black bg-amber-400/20 text-amber-600 border border-amber-400/30 flex items-center gap-1">
+                      <button 
+                        onClick={() => setShowRankModal(true)}
+                        className="px-3 py-1 rounded-full text-xs font-black bg-amber-400/20 hover:bg-amber-400/30 text-amber-600 border border-amber-400/30 flex items-center gap-1 transition-all shadow-sm active:scale-95"
+                      >
                         <Award className="w-3.5 h-3.5 text-amber-500" /> Hội Viên Hạng Vàng 🥇
-                      </span>
+                      </button>
                     </div>
                     <p className="text-xs text-muted-foreground font-semibold">
                       Mã SV: <strong className="text-foreground">{currentUser.studentId}</strong> | Chuyên ngành: <strong className="text-foreground">{currentUser.major}</strong>
@@ -185,27 +309,32 @@ export default function Profile() {
                 <div className="flex items-center gap-3 shrink-0">
                   <button
                     onClick={() => setShowEditModal(true)}
-                    className="px-4 py-2.5 bg-secondary hover:bg-secondary/80 text-foreground text-xs font-bold rounded-2xl border border-border flex items-center gap-1.5 transition-all"
+                    className="px-4 py-2.5 bg-secondary hover:bg-secondary/80 text-foreground text-xs font-bold rounded-2xl border border-border flex items-center gap-1.5 transition-all active:scale-95"
                   >
                     <Edit3 className="w-4 h-4 text-emerald-600" /> Chỉnh Sửa Hồ Sơ
                   </button>
                   <button
                     onClick={logout}
-                    className="px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 text-xs font-bold rounded-2xl border border-rose-500/20 flex items-center gap-1.5 transition-all"
+                    className="px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 text-xs font-bold rounded-2xl border border-rose-500/20 flex items-center gap-1.5 transition-all active:scale-95"
                   >
                     <LogOut className="w-4 h-4" /> Đăng Xuất
                   </button>
                 </div>
               </div>
 
-              {/* Progress Bar: Up Cấp Kim Cương */}
-              <div className="pt-4 border-t border-border/60 space-y-2">
+              {/* Progress Bar: Up Cấp Kim Cương (Clickable to view detailed roadmap) */}
+              <div 
+                onClick={() => setShowRankModal(true)}
+                className="pt-4 border-t border-border/60 space-y-2 cursor-pointer group hover:bg-secondary/30 p-2.5 rounded-2xl transition-all"
+                title="Nhấp để xem lộ trình thăng cấp chi tiết"
+              >
                 <div className="flex justify-between items-center text-xs font-extrabold">
-                  <span className="text-foreground flex items-center gap-1.5">
-                    <Zap className="w-4 h-4 text-amber-500" /> Tiến Trình Up Cấp: <strong className="text-emerald-600">83%</strong>
+                  <span className="text-foreground flex items-center gap-1.5 group-hover:text-emerald-600 transition-colors">
+                    <Zap className="w-4 h-4 text-amber-500 animate-pulse" /> Tiến Trình Up Cấp: <strong className="text-emerald-600 text-sm">83%</strong>
                   </span>
-                  <span className="text-muted-foreground">
+                  <span className="text-muted-foreground group-hover:text-foreground transition-colors flex items-center gap-1">
                     1,250 / 1,500 pt ➔ <strong className="text-cyan-600">Kim Cương 💎</strong>
+                    <ChevronRight className="w-4 h-4 text-emerald-600 group-hover:translate-x-1 transition-transform" />
                   </span>
                 </div>
                 <div className="h-3 w-full bg-secondary rounded-full overflow-hidden p-0.5 border border-border">
@@ -216,9 +345,14 @@ export default function Profile() {
                     className="h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 rounded-full shadow-md"
                   />
                 </div>
-                <p className="text-[11px] text-muted-foreground font-medium text-right">
-                  💡 Tích thêm <strong className="text-emerald-600">+250 pt</strong> nữa để lên Hạng Kim Cương & X2 Điểm thưởng!
-                </p>
+                <div className="flex justify-between items-center text-[11px]">
+                  <span className="text-emerald-600 font-bold flex items-center gap-1">
+                    👆 Nhấp vào thanh để xem bảng đặc quyền 5 cấp độ
+                  </span>
+                  <p className="text-muted-foreground font-medium">
+                    💡 Tích thêm <strong className="text-emerald-600">+250 pt</strong> nữa để lên Hạng Kim Cương & X2 Điểm thưởng!
+                  </p>
+                </div>
               </div>
 
             </div>
@@ -258,279 +392,264 @@ export default function Profile() {
             </div>
 
             {/* 7 Days Streak Calendar Grid */}
-            <div className="grid grid-cols-7 gap-2.5 text-center">
+            <div className="grid grid-cols-7 gap-2 md:gap-4 pt-2">
               {[
-                { day: "T2", pt: 20, done: true },
-                { day: "T3", pt: 20, done: true },
-                { day: "T4", pt: 20, done: true },
-                { day: "T5", pt: 20, done: true },
-                { day: "T6 (Hôm nay)", pt: 50, done: hasCheckedInToday, active: true },
-                { day: "T7", pt: 30, done: false },
-                { day: "CN", pt: 100, done: false, bonus: true }
-              ].map((item, i) => (
+                { day: "T2", pts: "+50", done: true },
+                { day: "T3", pts: "+50", done: true },
+                { day: "T4", pts: "+50", done: true },
+                { day: "T5", pts: "+50", done: true },
+                { day: "T6 (Hôm nay)", pts: "+50", current: true, done: hasCheckedInToday },
+                { day: "T7", pts: "+50", done: false },
+                { day: "CN 🎉", pts: "+100", done: false, bonus: true },
+              ].map((item, idx) => (
                 <div 
-                  key={i}
-                  className={`p-3 rounded-2xl border flex flex-col items-center justify-between gap-1 transition-all ${
-                    item.done 
-                      ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-700' 
-                      : item.active 
-                      ? 'bg-amber-500/10 border-amber-500/50 ring-2 ring-amber-500/30' 
-                      : 'bg-secondary/40 border-border opacity-60'
+                  key={idx}
+                  className={`p-3 rounded-2xl border text-center flex flex-col items-center justify-between gap-2 transition-all ${
+                    item.done
+                      ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-600'
+                      : item.current
+                      ? 'bg-amber-500/10 border-amber-500/50 text-amber-600 ring-2 ring-amber-500/20'
+                      : 'bg-secondary/40 border-border text-muted-foreground'
                   }`}
                 >
-                  <span className="text-[11px] font-bold">{item.day}</span>
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center font-black text-xs my-1 ${
-                    item.done ? 'bg-emerald-500 text-white' : item.bonus ? 'bg-amber-400 text-amber-950 font-extrabold' : 'bg-secondary text-muted-foreground'
-                  }`}>
-                    {item.done ? <Check className="w-4 h-4" /> : `+${item.pt}`}
+                  <span className="text-[10px] font-black uppercase">{item.day}</span>
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs">
+                    {item.done ? (
+                      <Check className="w-5 h-5 text-emerald-600" />
+                    ) : item.bonus ? (
+                      <Sparkles className="w-5 h-5 text-amber-500 animate-pulse" />
+                    ) : (
+                      <Calendar className="w-4 h-4 text-muted-foreground" />
+                    )}
                   </div>
-                  <span className="text-[10px] font-mono font-bold">
-                    {item.done ? 'Đã nhận' : item.bonus ? '🎁 Quà Khúc' : `+${item.pt}pt`}
-                  </span>
+                  <span className="text-xs font-mono font-black">{item.pts}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* 🪙 SECTION 2: VÍ ĐIỂM THƯỞNG */}
-          <div className="bg-gradient-to-br from-emerald-900/40 via-card to-card border border-emerald-500/30 rounded-3xl p-6 md:p-8 shadow-sm space-y-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="space-y-1">
-                <span className="text-xs font-extrabold text-emerald-600 uppercase tracking-wider flex items-center gap-1.5">
-                  <Wallet className="w-4 h-4 text-emerald-600" /> Ví Điểm Thưởng Khả Dụng
-                </span>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-4xl md:text-5xl font-black font-mono text-emerald-600">{currentUser.points}</span>
-                  <span className="text-lg font-bold text-muted-foreground">điểm xanh</span>
+          {/* 🪪 SECTION 2: SUB-TABS (VÍ ĐIỂM, QUÀ TẶNG, ĐẶC QUYỀN, CÀI ĐẶT) */}
+          <div className="space-y-6">
+            
+            {/* Sub-tabs header */}
+            <div className="flex bg-secondary/80 p-1.5 rounded-2xl border border-border overflow-x-auto">
+              {[
+                { id: "wallet", label: "Ví Điểm Thưởng", icon: Wallet },
+                { id: "vouchers", label: "Quà Của Tôi (3)", icon: Gift },
+                { id: "privileges", label: "Đặc Quyền Hội Viên", icon: Award },
+                { id: "security", label: "Cài Đặt & Bảo Mật", icon: ShieldCheck }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`flex-1 py-3 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 whitespace-nowrap ${
+                    activeTab === tab.id
+                      ? 'bg-card text-emerald-600 shadow border border-emerald-500/20'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <tab.icon className="w-4 h-4" />
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* TAB CONTENT: VÍ ĐIỂM THƯỞNG */}
+            {activeTab === "wallet" && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <div className="md:col-span-1 bg-gradient-to-br from-emerald-600 to-teal-800 rounded-3xl p-6 text-white shadow-xl flex flex-col justify-between space-y-6 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-bl-full pointer-events-none" />
+                  
+                  <div className="space-y-1">
+                    <span className="text-xs font-bold uppercase tracking-wider text-emerald-200">Số Dư Điểm Khả Dụng</span>
+                    <h3 className="text-4xl font-black font-mono tracking-tight">{currentUser.points.toLocaleString()} pt</h3>
+                  </div>
+
+                  <div className="space-y-2">
+                    <p className="text-xs text-emerald-100 font-medium">Hội viên hạng Vàng (Giảm 5% giá đổi voucher)</p>
+                    <div className="flex gap-2">
+                      <Link 
+                        href="/tich-diem" 
+                        className="flex-1 py-2.5 bg-white text-emerald-800 hover:bg-emerald-50 font-black text-xs rounded-xl text-center shadow transition-all"
+                      >
+                        Đổi Quà Ngay 🎁
+                      </Link>
+                      <button 
+                        onClick={() => setShowHistoryModal(true)}
+                        className="px-3 py-2.5 bg-emerald-700/60 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl border border-white/20 transition-all"
+                      >
+                        Lịch Sử
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              <div className="flex items-center gap-3 w-full sm:w-auto">
-                <Link
-                  href="/tich-diem"
-                  className="flex-1 sm:flex-none px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-2xl text-xs shadow-md transition-all flex items-center justify-center gap-1.5"
-                >
-                  <Gift className="w-4 h-4" /> Đổi Quà Ngay
-                </Link>
-                <button
-                  onClick={() => setShowHistoryModal(true)}
-                  className="flex-1 sm:flex-none px-5 py-3 bg-secondary hover:bg-secondary/80 text-foreground font-bold rounded-2xl text-xs border border-border transition-all flex items-center justify-center gap-1.5"
-                >
-                  <Clock className="w-4 h-4 text-emerald-600" /> Lịch Sử Điểm
-                </button>
-              </div>
-            </div>
-          </div>
+                {/* Point History Snippet */}
+                <div className="md:col-span-2 bg-card border border-border rounded-3xl p-6 shadow-sm space-y-4">
+                  <div className="flex justify-between items-center border-b border-border pb-3">
+                    <h4 className="font-extrabold text-foreground text-sm flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-emerald-600" /> Biến Động Điểm Mới Nhất
+                    </h4>
+                    <button 
+                      onClick={() => setShowHistoryModal(true)}
+                      className="text-xs font-bold text-emerald-600 hover:underline"
+                    >
+                      Xem tất cả ➔
+                    </button>
+                  </div>
 
-          {/* 🌟 SECTION 3: ĐẶC QUYỀN HỘI VIÊN & QUÀ CỦA TÔI */}
-          <div className="bg-card border border-border rounded-3xl p-6 md:p-8 shadow-sm space-y-6">
-            <div className="flex items-center justify-between border-b border-border pb-4">
-              <h2 className="text-xl font-black text-foreground flex items-center gap-2">
-                <Sparkles className="w-6 h-6 text-amber-500" /> Đặc Quyền Hội Viên & Quà Của Tôi
-              </h2>
-              
-              {/* Tabs selector */}
-              <div className="flex bg-secondary p-1 rounded-2xl border border-border">
-                <button
-                  onClick={() => setActiveTab("vouchers")}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                    activeTab === "vouchers" ? "bg-card text-emerald-600 shadow" : "text-muted-foreground"
-                  }`}
-                >
-                  🎟️ Quà Của Tôi ({myVouchers.length})
-                </button>
-                <button
-                  onClick={() => setActiveTab("privileges")}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                    activeTab === "privileges" ? "bg-card text-amber-600 shadow" : "text-muted-foreground"
-                  }`}
-                >
-                  ⚡ Đặc Quyền Hạng Vàng
-                </button>
-              </div>
-            </div>
+                  <div className="space-y-3">
+                    {pointTransactions.map((t) => (
+                      <div key={t.id} className="p-3 bg-secondary/50 rounded-2xl flex items-center justify-between text-xs">
+                        <div className="space-y-0.5">
+                          <p className="font-bold text-foreground">{t.title}</p>
+                          <p className="text-[10px] text-muted-foreground">{t.date}</p>
+                        </div>
+                        <span className={`font-mono font-black ${t.type === 'plus' ? 'text-emerald-600' : 'text-rose-500'}`}>
+                          {t.points}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
-            {/* Tab 1: My Saved Vouchers */}
+              </motion.div>
+            )}
+
+            {/* TAB CONTENT: QUÀ CỦA TÔI */}
             {activeTab === "vouchers" && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {myVouchers.map((v) => (
-                  <div key={v.id} className="p-4 bg-secondary/40 border border-border rounded-2xl space-y-3 relative group hover:border-emerald-500/40 transition-all">
-                    <div className="flex justify-between items-start">
-                      <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+                  <div key={v.id} className="bg-card border border-border rounded-3xl p-5 shadow-sm space-y-4 relative overflow-hidden flex flex-col justify-between">
+                    <div className="space-y-2">
+                      <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
                         <v.icon className="w-5 h-5" />
                       </div>
-                      <span className="text-[10px] font-bold text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">
-                        HSD: {v.expiry}
-                      </span>
+                      <h4 className="font-bold text-foreground text-sm leading-snug">{v.title}</h4>
+                      <p className="text-xs text-muted-foreground">Hạn sử dụng: <strong className="text-foreground">{v.expiry}</strong></p>
                     </div>
 
-                    <div>
-                      <h4 className="font-bold text-foreground text-sm line-clamp-1">{v.title}</h4>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">Đã dùng: {v.points} pt</p>
-                    </div>
-
-                    <div className="p-2.5 bg-background border border-border rounded-xl flex items-center justify-between font-mono text-xs">
-                      <span className="font-black text-emerald-600">{v.code}</span>
+                    <div className="p-3 bg-secondary/80 border border-border rounded-2xl flex items-center justify-between pt-2">
+                      <span className="font-mono font-black text-xs tracking-wider text-emerald-700">{v.code}</span>
                       <button
                         onClick={() => handleCopyCode(v.code)}
-                        className="text-muted-foreground hover:text-foreground text-[10px] font-bold flex items-center gap-1"
+                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[11px] font-bold flex items-center gap-1 shadow-sm transition-all"
                       >
-                        <Copy className="w-3 h-3" /> Coppy
+                        <Copy className="w-3 h-3" /> Copy
                       </button>
                     </div>
                   </div>
                 ))}
-              </div>
+              </motion.div>
             )}
 
-            {/* Tab 2: Gold Tier Privileges */}
+            {/* TAB CONTENT: ĐẶC QUYỀN HỘI VIÊN */}
             {activeTab === "privileges" && (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl space-y-2">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500 text-amber-950 flex items-center justify-center font-black">
-                    1.5x
-                  </div>
-                  <h4 className="font-bold text-foreground text-sm">X1.5 Điểm Thưởng Tích Lũy</h4>
-                  <p className="text-xs text-muted-foreground">Nhận 1.5 lần điểm thưởng cho mọi lượt phân loại rác AI tại trạm.</p>
-                </div>
-
-                <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl space-y-2">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-black">
-                    🎁
-                  </div>
-                  <h4 className="font-bold text-foreground text-sm">Voucher Sinh Nhật 100.000đ</h4>
-                  <p className="text-xs text-muted-foreground">Tặng ngay voucher quà tặng 100k vào tháng sinh nhật của bạn.</p>
-                </div>
-
-                <div className="p-4 bg-cyan-500/10 border border-cyan-500/30 rounded-2xl space-y-2">
-                  <div className="w-10 h-10 rounded-xl bg-cyan-500 text-white flex items-center justify-center font-black">
-                    ⚡
-                  </div>
-                  <h4 className="font-bold text-foreground text-sm">Ưu Tiên Đổi Quà Sinh Thái</h4>
-                  <p className="text-xs text-muted-foreground">Đặc quyền đặt trước bình nước EcoValues & túi canvas giới hạn.</p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* ⚙️ SECTION 4: CÀI ĐẶT & BẢO MẬT */}
-          <div className="bg-card border border-border rounded-3xl p-6 md:p-8 shadow-sm space-y-6">
-            <h2 className="text-xl font-black text-foreground flex items-center gap-2 border-b border-border pb-4">
-              <ShieldCheck className="w-6 h-6 text-emerald-600" /> Cài Đặt & Bảo Mật Tài Khoản
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              
-              {/* 🔑 Item 1: Đổi mật khẩu */}
-              <div 
-                onClick={() => setShowChangePasswordModal(true)}
-                className="p-4 bg-secondary/40 hover:bg-secondary/80 border border-border rounded-2xl flex items-center justify-between cursor-pointer transition-all group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
-                    <KeyRound className="w-5 h-5" />
-                  </div>
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-card border border-border rounded-3xl p-6 md:p-8 shadow-sm space-y-6">
+                <div className="flex justify-between items-center border-b border-border pb-4">
                   <div>
-                    <h4 className="font-bold text-foreground text-sm group-hover:text-emerald-600 transition-colors">🔑 Đổi Mật Khẩu Tài Khoản</h4>
-                    <p className="text-xs text-muted-foreground">Cập nhật mật khẩu bảo mật 2 lớp</p>
+                    <h3 className="text-lg font-black text-foreground">Bảng Đặc Quyền Hạng Vàng 🥇</h3>
+                    <p className="text-xs text-muted-foreground">Các ưu đãi bạn đang được hưởng trên toàn hệ sinh thái CMC</p>
                   </div>
-                </div>
-                <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
-              </div>
-
-              {/* 📍 Item 2: Địa chỉ nhận quà */}
-              <div className="p-4 bg-secondary/40 border border-border rounded-2xl space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
-                      <MapPin className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-foreground text-sm">📍 Địa Chỉ Nhận Quà</h4>
-                      <p className="text-xs text-muted-foreground">Địa chỉ giao quà tặng trực tiếp</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setIsEditingAddress(!isEditingAddress)}
-                    className="text-xs font-bold text-emerald-600 hover:underline"
+                  <button 
+                    onClick={() => setShowRankModal(true)}
+                    className="px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl hover:bg-emerald-700 transition-all shadow-sm"
                   >
-                    {isEditingAddress ? "Lưu" : "Sửa"}
+                    Xem Tất Cả 5 Cấp Độ ➔
                   </button>
                 </div>
 
-                {isEditingAddress ? (
-                  <input
-                    type="text"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    className="w-full px-3 py-2 bg-background border border-border rounded-xl text-xs font-medium text-foreground outline-none focus:ring-2 focus:ring-emerald-500"
-                  />
-                ) : (
-                  <p className="text-xs font-semibold text-foreground bg-background p-2.5 rounded-xl border border-border/60">
-                    {address}
-                  </p>
-                )}
-              </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {[
+                    { title: "+20% Điểm Thu Gom", desc: "Tăng 20% số điểm thưởng nhận được khi phân loại rác tại trạm.", icon: Zap },
+                    { title: "Đổi Quà Độc Quyền", desc: "Được quyền đổi các sản phẩm quà tặng giới hạn như Bình nước tre Eco.", icon: Gift },
+                    { title: "Giấy Chứng Nhận Xanh", desc: "Cấp chứng nhận thành viên tích cực đóng góp hoạt động cộng đồng.", icon: Award }
+                  ].map((p, idx) => (
+                    <div key={idx} className="p-4 bg-secondary/50 border border-border rounded-2xl space-y-2">
+                      <p.icon className="w-6 h-6 text-emerald-600" />
+                      <h4 className="font-bold text-foreground text-sm">{p.title}</h4>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{p.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
 
-              {/* 🔔 Item 3: Thông báo */}
-              <div className="p-4 bg-secondary/40 border border-border rounded-2xl space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
-                    <Bell className="w-5 h-5" />
-                  </div>
+            {/* TAB CONTENT: CÀI ĐẶT BẢO MẬT */}
+            {activeTab === "security" && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-card border border-border rounded-3xl p-6 md:p-8 shadow-sm space-y-6">
+                
+                {/* Security Password */}
+                <div className="flex items-center justify-between border-b border-border pb-4">
                   <div>
-                    <h4 className="font-bold text-foreground text-sm">🔔 Cài Đặt Thông Báo</h4>
-                    <p className="text-xs text-muted-foreground">Tùy chọn nhận email & cảnh báo trạm</p>
+                    <h4 className="font-bold text-foreground text-sm flex items-center gap-2">
+                      <KeyRound className="w-4 h-4 text-emerald-600" /> Đổi Mật Khẩu Đăng Nhập
+                    </h4>
+                    <p className="text-xs text-muted-foreground">Mật khẩu được mã hóa an toàn đạt chuẩn bảo mật EcoValues</p>
                   </div>
+                  <button
+                    onClick={() => setShowChangePasswordModal(true)}
+                    className="px-4 py-2 bg-secondary hover:bg-secondary/80 text-foreground text-xs font-bold rounded-xl border border-border"
+                  >
+                    Đổi Mật Khẩu
+                  </button>
                 </div>
 
-                <div className="space-y-2 pt-1">
-                  <label className="flex items-center justify-between text-xs font-medium cursor-pointer">
-                    <span>Email thông báo tích điểm & quà</span>
-                    <input
-                      type="checkbox"
-                      checked={notifEmail}
+                {/* Shipping Address */}
+                <div className="flex items-center justify-between border-b border-border pb-4">
+                  <div className="space-y-1">
+                    <h4 className="font-bold text-foreground text-sm flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-emerald-600" /> Địa Chỉ Nhận Quà Tận Nơi
+                    </h4>
+                    {isEditingAddress ? (
+                      <input 
+                        type="text"
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
+                        className="w-full md:w-96 px-3 py-1.5 bg-background border border-border rounded-xl text-xs font-semibold text-foreground outline-none"
+                      />
+                    ) : (
+                      <p className="text-xs text-muted-foreground">{address}</p>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (isEditingAddress) {
+                        toast({ title: "Đã Lưu Địa Chỉ!", description: "Địa chỉ nhận quà mới đã được lưu." });
+                      }
+                      setIsEditingAddress(!isEditingAddress);
+                    }}
+                    className="px-4 py-2 bg-secondary hover:bg-secondary/80 text-foreground text-xs font-bold rounded-xl border border-border shrink-0"
+                  >
+                    {isEditingAddress ? "Lưu" : "Sửa Địa Chỉ"}
+                  </button>
+                </div>
+
+                {/* Notifications */}
+                <div className="space-y-3">
+                  <h4 className="font-bold text-foreground text-sm flex items-center gap-2">
+                    <Bell className="w-4 h-4 text-emerald-600" /> Cài Đặt Thông Báo
+                  </h4>
+                  <div className="flex items-center justify-between text-xs p-3 bg-secondary/50 rounded-2xl">
+                    <span>Nhận thông báo sự kiện đổi quà qua Gmail ({currentUser.email})</span>
+                    <input 
+                      type="checkbox" 
+                      checked={notifEmail} 
                       onChange={(e) => setNotifEmail(e.target.checked)}
-                      className="w-4 h-4 accent-emerald-600 rounded"
+                      className="w-4 h-4 accent-emerald-600 cursor-pointer"
                     />
-                  </label>
-                  <label className="flex items-center justify-between text-xs font-medium cursor-pointer">
-                    <span>Cảnh báo trạm AI sắp đầy (trên 85%)</span>
-                    <input
-                      type="checkbox"
-                      checked={notifPush}
-                      onChange={(e) => setNotifPush(e.target.checked)}
-                      className="w-4 h-4 accent-emerald-600 rounded"
-                    />
-                  </label>
-                </div>
-              </div>
-
-              {/* ❓ Item 4: Hỗ trợ & Trợ giúp */}
-              <div className="p-4 bg-secondary/40 border border-border rounded-2xl flex items-center justify-between space-y-0">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
-                    <HelpCircle className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-foreground text-sm">❓ Hỗ Trợ & Trợ Giúp</h4>
-                    <p className="text-xs text-muted-foreground">Hotline: 0912.345.678 (24/7)</p>
                   </div>
                 </div>
-                <Link
-                  href="/tham-gia"
-                  className="px-3 py-1.5 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition-colors"
-                >
-                  Liên Hệ
-                </Link>
-              </div>
 
-            </div>
+              </motion.div>
+            )}
+
           </div>
 
         </section>
 
-        {/* Modal 1: Edit Profile Name & Student ID */}
+        {/* Modal 1: Edit Profile & Change Avatar Modal */}
         <AnimatePresence>
           {showEditModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
@@ -538,13 +657,61 @@ export default function Profile() {
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-card border border-border p-6 md:p-8 rounded-3xl max-w-md w-full shadow-2xl space-y-4"
+                className="bg-card border border-border p-6 md:p-8 rounded-3xl max-w-lg w-full shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto"
               >
-                <h3 className="text-xl font-black text-foreground">Chỉnh Sửa Hồ Sơ Cá Nhân</h3>
-                
-                <div className="space-y-3">
+                <div className="flex items-center justify-between border-b border-border pb-3">
+                  <h3 className="text-xl font-black text-foreground flex items-center gap-2">
+                    <Edit3 className="w-5 h-5 text-emerald-600" /> Chỉnh Sửa Hồ Sơ & Avatar
+                  </h3>
+                  <button onClick={() => setShowEditModal(false)} className="text-xs font-bold text-muted-foreground hover:text-foreground">Đóng ✖</button>
+                </div>
+
+                {/* Avatar Change Section */}
+                <div className="space-y-3 bg-secondary/40 p-4 rounded-2xl border border-border">
+                  <label className="block text-xs font-bold text-foreground">Ảnh Đại Diện (Avatar)</label>
+                  
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-500 overflow-hidden shrink-0">
+                      <img src={avatarUrl} alt="Avatar Preview" className="w-full h-full object-cover" />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow transition-all active:scale-95"
+                      >
+                        <Upload className="w-3.5 h-3.5" /> Tải Ảnh Từ Máy (.jpg, .png)
+                      </button>
+                      <p className="text-[10px] text-muted-foreground">Chấp nhận ảnh dung lượng dưới 5MB</p>
+                    </div>
+                  </div>
+
+                  {/* Preset Eco Avatars */}
+                  <div className="pt-2">
+                    <span className="text-[11px] font-bold text-muted-foreground block mb-2">Hoặc chọn Avatar Bộ sưu tập Eco:</span>
+                    <div className="flex gap-2.5 overflow-x-auto pb-1">
+                      {PRESET_AVATARS.map((item) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => handleSelectPresetAvatar(item.url)}
+                          className={`w-12 h-12 rounded-full border-2 overflow-hidden shrink-0 transition-all hover:scale-105 ${
+                            avatarUrl === item.url ? 'border-emerald-500 ring-2 ring-emerald-500/30' : 'border-border'
+                          }`}
+                          title={item.name}
+                        >
+                          <img src={item.url} alt={item.name} className="w-full h-full object-cover" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Form edit name & student ID */}
+                <div className="space-y-4">
                   <div>
-                    <label className="block text-xs font-bold text-foreground mb-1">Họ và Tên (*)</label>
+                    <label className="block text-xs font-bold text-foreground mb-1">Họ và Tên Hiển Thị (*)</label>
                     <input
                       type="text"
                       value={editName}
@@ -574,9 +741,9 @@ export default function Profile() {
                   <button
                     onClick={() => {
                       setShowEditModal(false);
-                      toast({ title: "Đã Cập Nhật Hồ Sơ!", description: "Thông tin tên và mã số của bạn đã thay đổi." });
+                      toast({ title: "Đã Cập Nhật Hồ Sơ!", description: "Thông tin hồ sơ và ảnh đại diện đã được lưu thành công." });
                     }}
-                    className="flex-1 py-2.5 bg-emerald-600 text-white font-bold rounded-xl text-xs hover:bg-emerald-700 shadow-md"
+                    className="flex-1 py-2.5 bg-emerald-600 text-white font-bold rounded-xl text-xs hover:bg-emerald-700 shadow-md active:scale-95"
                   >
                     Lưu Thay Đổi
                   </button>
@@ -586,7 +753,116 @@ export default function Profile() {
           )}
         </AnimatePresence>
 
-        {/* Modal 2: Point History Dialog */}
+        {/* Modal 2: Detailed Rank Progress & Roadmap Modal */}
+        <AnimatePresence>
+          {showRankModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="bg-card border border-border p-6 md:p-8 rounded-3xl max-w-xl w-full shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto"
+              >
+                <div className="flex items-center justify-between border-b border-border pb-3">
+                  <div>
+                    <h3 className="text-xl font-black text-foreground flex items-center gap-2">
+                      <Trophy className="w-5 h-5 text-amber-500" /> Bảng Tiến Trình Thăng Cấp
+                    </h3>
+                    <p className="text-xs text-muted-foreground">Lộ trình 5 cấp bậc hội viên & đặc quyền tích điểm</p>
+                  </div>
+                  <button onClick={() => setShowRankModal(false)} className="text-xs font-bold text-muted-foreground hover:text-foreground">Đóng ✖</button>
+                </div>
+
+                {/* Current User Rank Status Banner */}
+                <div className="p-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl space-y-3 shadow-md">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs font-bold uppercase tracking-wider text-emerald-100">Hạng Hiện Tại Của Bạn</span>
+                    <span className="px-3 py-1 bg-amber-400 text-amber-950 text-xs font-black rounded-full shadow">🥇 HỘI VIÊN HẠNG VÀNG</span>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-xs font-bold">
+                      <span>Tiến trình lên Kim Cương: 83%</span>
+                      <span className="font-mono">1,250 / 1,500 pt</span>
+                    </div>
+                    <div className="h-2.5 w-full bg-white/20 rounded-full overflow-hidden p-0.5">
+                      <div className="h-full bg-white rounded-full w-[83%]" />
+                    </div>
+                  </div>
+                  
+                  <p className="text-[11px] text-emerald-100 font-medium">
+                    ⚡ Bạn chỉ cần tích thêm <strong className="text-white underline">+250 pt</strong> để mở khóa Hạng Kim Cương & X2 Điểm Thưởng!
+                  </p>
+                </div>
+
+                {/* 5 Tiers Detailed Roadmap List */}
+                <div className="space-y-3">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Chi Tiết 5 Cấp Bậc & Đặc Quyền:</h4>
+
+                  {TIERS.map((tier, idx) => (
+                    <div 
+                      key={idx}
+                      className={`p-4 rounded-2xl border transition-all ${
+                        tier.isCurrent
+                          ? 'bg-amber-500/10 border-amber-500/50 ring-2 ring-amber-500/20'
+                          : tier.isNext
+                          ? 'bg-emerald-500/10 border-emerald-500/40'
+                          : 'bg-secondary/40 border-border opacity-80'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl">{tier.icon}</span>
+                          <span className="font-black text-sm text-foreground">{tier.name}</span>
+                          {tier.isCurrent && (
+                            <span className="px-2 py-0.5 bg-amber-500 text-white text-[10px] font-black rounded-md">
+                              HẠNG HIỆN TẠI
+                            </span>
+                          )}
+                          {tier.isNext && (
+                            <span className="px-2 py-0.5 bg-emerald-600 text-white text-[10px] font-black rounded-md animate-pulse">
+                              MỤC TIÊU TIẾP THEO
+                            </span>
+                          )}
+                        </div>
+                        <span className="font-mono text-xs font-extrabold text-muted-foreground">
+                          {tier.minPoints.toLocaleString()} - {tier.maxPoints > 50000 ? "Không giới hạn" : tier.maxPoints.toLocaleString()} pt
+                        </span>
+                      </div>
+
+                      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs text-muted-foreground pt-1">
+                        {tier.perks.map((perk, pIdx) => (
+                          <li key={pIdx} className="flex items-center gap-1.5 font-medium">
+                            <CheckCircle className={`w-3.5 h-3.5 shrink-0 ${tier.isCurrent ? 'text-amber-500' : 'text-emerald-600'}`} />
+                            {perk}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="pt-2 flex gap-3">
+                  <button
+                    onClick={() => setShowRankModal(false)}
+                    className="flex-1 py-2.5 bg-secondary text-foreground font-bold rounded-xl text-xs border border-border"
+                  >
+                    Đóng Bảng
+                  </button>
+                  <Link
+                    href="/tich-diem"
+                    onClick={() => setShowRankModal(false)}
+                    className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl text-xs text-center shadow-md flex items-center justify-center gap-1 active:scale-95"
+                  >
+                    Tích Điểm Ngay ➔
+                  </Link>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
+        {/* Modal 3: Point History Dialog */}
         <AnimatePresence>
           {showHistoryModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
@@ -621,7 +897,7 @@ export default function Profile() {
           )}
         </AnimatePresence>
 
-        {/* Modal 3: Change Password Modal */}
+        {/* Modal 4: Change Password Modal */}
         <AnimatePresence>
           {showChangePasswordModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
