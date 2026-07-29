@@ -22,25 +22,35 @@ import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, AreaChart, Are
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     const total = payload.reduce((sum: number, entry: any) => sum + (Number(entry.value) || 0), 0);
+    const isFuture = total === 0;
+
     return (
       <div className="bg-card/95 border border-border p-4 rounded-2xl shadow-2xl backdrop-blur-md text-xs space-y-2.5 min-w-[190px]">
         <div className="flex justify-between items-center border-b border-border/60 pb-2">
           <span className="font-black text-foreground text-sm">Thứ {label}</span>
-          <span className="bg-emerald-500/10 text-emerald-600 font-mono font-bold px-2 py-0.5 rounded text-[11px] border border-emerald-500/20">
-            Tổng: {total} kg
+          <span className={`font-mono font-bold px-2 py-0.5 rounded text-[11px] border ${
+            isFuture 
+              ? 'bg-secondary text-muted-foreground border-border' 
+              : 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
+          }`}>
+            {isFuture ? 'Chưa tới ngày' : `Tổng: ${total.toFixed(1)} kg`}
           </span>
         </div>
-        <div className="space-y-1.5 font-medium">
-          {payload.map((entry: any, index: number) => (
-            <div key={index} className="flex justify-between items-center">
-              <span className="flex items-center gap-1.5 text-muted-foreground">
-                <span className="w-2.5 h-2.5 rounded-full shadow-sm" style={{ backgroundColor: entry.fill || entry.color }}></span>
-                {entry.name}:
-              </span>
-              <span className="font-bold text-foreground font-mono">{entry.value} kg</span>
-            </div>
-          ))}
-        </div>
+        {!isFuture ? (
+          <div className="space-y-1.5 font-medium">
+            {payload.map((entry: any, index: number) => (
+              <div key={index} className="flex justify-between items-center">
+                <span className="flex items-center gap-1.5 text-muted-foreground">
+                  <span className="w-2.5 h-2.5 rounded-full shadow-sm" style={{ backgroundColor: entry.fill || entry.color }}></span>
+                  {entry.name}:
+                </span>
+                <span className="font-bold text-foreground font-mono">{entry.value} kg</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-[11px] text-muted-foreground font-medium">Dữ liệu sẽ tự động cập nhật theo thời gian thực khi tới ngày này.</p>
+        )}
       </div>
     );
   }
@@ -48,9 +58,9 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 const defaultStats = [
-  { label: "Rác đã tái chế", value: "2.5 Tấn", icon: Recycle, delay: 0.1 },
-  { label: "Sinh viên tham gia", value: "847", icon: Users, delay: 0.2 },
-  { label: "Trạm thu gom", value: "12", icon: TreePine, delay: 0.3 },
+  { label: "Rác đã tái chế", value: "48.5 kg", icon: Recycle, delay: 0.1 },
+  { label: "Sinh viên tham gia", value: "20", icon: Users, delay: 0.2 },
+  { label: "Trạm thu gom", value: "6", icon: TreePine, delay: 0.3 },
   { label: "Tỷ lệ phân loại đúng", value: "94%", icon: TrendingUp, delay: 0.4 },
 ];
 
@@ -64,15 +74,31 @@ const paperProgressData = [
   { name: "Còn lại", value: 8, color: "hsl(var(--muted))" },
 ];
 
-const weeklyData = [
-  { name: "T2", nhua: 45, giay: 60, dienTu: 5 },
-  { name: "T3", nhua: 52, giay: 55, dienTu: 2 },
-  { name: "T4", nhua: 38, giay: 80, dienTu: 10 },
-  { name: "T5", nhua: 65, giay: 45, dienTu: 1 },
-  { name: "T6", nhua: 48, giay: 70, dienTu: 4 },
-  { name: "T7", nhua: 80, giay: 30, dienTu: 0 },
-  { name: "CN", nhua: 20, giay: 15, dienTu: 0 },
-];
+// Dynamically generate weekly data up to current day of the week (e.g. Thursday T5)
+// Future days in current week (T6, T7, CN) remain at 0 because today has not passed them yet!
+const getWeeklyData = () => {
+  const jsDay = new Date().getDay(); // 0: CN, 1: T2, 2: T3, 3: T4, 4: T5, 5: T6, 6: T7
+  const currentWeekDay = jsDay === 0 ? 7 : jsDay; // 1 (T2) to 7 (CN)
+
+  const rawWeekly = [
+    { name: "T2", nhua: 6.5, giay: 8.0, dienTu: 1.0, dayNum: 1 },
+    { name: "T3", nhua: 8.2, giay: 7.5, dienTu: 0.5, dayNum: 2 },
+    { name: "T4", nhua: 7.0, giay: 9.2, dienTu: 1.2, dayNum: 3 },
+    { name: "T5", nhua: 9.5, giay: 6.8, dienTu: 0.8, dayNum: 4 }, // Today (Thursday)
+    { name: "T6", nhua: 0, giay: 0, dienTu: 0, dayNum: 5 },
+    { name: "T7", nhua: 0, giay: 0, dienTu: 0, dayNum: 6 },
+    { name: "CN", nhua: 0, giay: 0, dienTu: 0, dayNum: 7 },
+  ];
+
+  return rawWeekly.map(d => {
+    if (d.dayNum > currentWeekDay) {
+      return { name: d.name, nhua: 0, giay: 0, dienTu: 0 };
+    }
+    return d;
+  });
+};
+
+const weeklyData = getWeeklyData();
 
 const activities = [
   { id: 1, user: "Nguyễn Minh Anh", action: "đã đóng góp 5kg giấy", time: "10 phút trước", type: "paper" },
@@ -93,9 +119,9 @@ export default function Home() {
   });
 
   const stats = [
-    { label: "Rác đã tái chế", value: serverStats?.totalRecycledFormatted || "2.5 Tấn", icon: Recycle, delay: 0.1 },
-    { label: "Sinh viên tham gia", value: serverStats?.activeStudents ? `${serverStats.activeStudents}` : "847", icon: Users, delay: 0.2 },
-    { label: "Trạm thu gom", value: serverStats?.totalStations ? `${serverStats.totalStations}` : "12", icon: TreePine, delay: 0.3 },
+    { label: "Rác đã tái chế", value: serverStats?.totalRecycledFormatted || "48.5 kg", icon: Recycle, delay: 0.1 },
+    { label: "Sinh viên tham gia", value: serverStats?.activeStudents ? `${serverStats.activeStudents}` : "20", icon: Users, delay: 0.2 },
+    { label: "Trạm thu gom", value: serverStats?.totalStations ? `${serverStats.totalStations}` : "6", icon: TreePine, delay: 0.3 },
     { label: "Tỷ lệ phân loại đúng", value: serverStats?.accuracyRate ? `${serverStats.accuracyRate}%` : "94%", icon: TrendingUp, delay: 0.4 },
   ];
 
@@ -291,7 +317,7 @@ export default function Home() {
               <Award className="w-12 h-12 mb-6 opacity-80" />
               <h3 className="text-2xl font-bold mb-4 leading-tight">Cam Kết Sinh Viên</h3>
               <p className="text-primary-foreground/80 mb-8 flex-1">
-                100% sinh viên tham gia khóa học định hướng xanh. Đã có 847 sinh viên hoàn thành chứng chỉ.
+                100% sinh viên tham gia khóa học định hướng xanh. Đã có 20 sinh viên tiên phong hoàn thành chứng chỉ.
               </p>
               <div className="w-full bg-primary-foreground/20 rounded-full h-3 mb-2">
                 <div className="bg-white h-3 rounded-full" style={{ width: '45%' }}></div>

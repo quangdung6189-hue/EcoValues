@@ -56,10 +56,10 @@ class MemStorage {
   private rewards: Reward[] = [];
   private registrations: Registration[] = [];
   private stats = {
-    totalRecycledWeightKg: 3120,
-    activeStudents: 980,
-    totalStations: 14,
-    accuracyRate: 96,
+    totalRecycledWeightKg: 48.5,
+    activeStudents: 20,
+    totalStations: 6,
+    accuracyRate: 94,
   };
 
   constructor() {
@@ -272,7 +272,7 @@ class MemStorage {
   getStats() {
     return {
       ...this.stats,
-      totalRecycledFormatted: `${(this.stats.totalRecycledWeightKg / 1000).toFixed(1)} Tấn`,
+      totalRecycledFormatted: `${this.stats.totalRecycledWeightKg} kg`,
     };
   }
 
