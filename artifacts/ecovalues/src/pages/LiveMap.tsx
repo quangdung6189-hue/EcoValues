@@ -44,130 +44,17 @@ interface Station {
   lng: number;
 }
 
+// Optimized, streamlined set of 6 stations focused on CMC CS2 (Vạn Phúc - Hà Đông) & CS1 (Duy Tân - Cầu Giấy)
 const DEFAULT_STATIONS: Station[] = [
-  // === CMC CS1: Duy Tân, Cầu Giấy ===
+  // === CMC CS2: Vạn Phúc, Hà Đông (Focus 1) ===
   {
     id: "S01",
-    name: "Trạm Thư Viện CS1",
-    campus: "CS1",
-    campusName: "CMC CS1 (Duy Tân - Cầu Giấy)",
-    building: "Tòa Duy Tân",
-    floor: "Tầng 1",
-    location: "Sảnh Thư Viện - Khu tự học Cầu Giấy",
-    types: ["paper", "plastic"],
-    status: "active",
-    capacity: 45,
-    lastCollected: "10:30 Hôm nay",
-    hours: "08:00 - 20:00",
-    lat: 21.0318,
-    lng: 105.7828
-  },
-  {
-    id: "S02",
-    name: "Trạm Căng Tin CS1",
-    campus: "CS1",
-    campusName: "CMC CS1 (Duy Tân - Cầu Giấy)",
-    building: "Tòa Duy Tân",
-    floor: "Tầng B1",
-    location: "Khu ẩm thực Căng tin CS1 Cầu Giấy",
-    types: ["plastic"],
-    status: "full",
-    capacity: 92,
-    lastCollected: "14:00 Hôm qua",
-    hours: "07:00 - 18:00",
-    lat: 21.0310,
-    lng: 105.7818
-  },
-  {
-    id: "S03",
-    name: "Trạm IT & AI Hub CS1",
-    campus: "CS1",
-    campusName: "CMC CS1 (Duy Tân - Cầu Giấy)",
-    building: "Tòa Công Nghệ",
-    floor: "Tầng 3",
-    location: "Hành lang Phòng Lab Máy Tính CS1",
-    types: ["ewaste"],
-    status: "active",
-    capacity: 25,
-    lastCollected: "Thứ 2 vừa rồi",
-    hours: "08:00 - 17:00",
-    lat: 21.0326,
-    lng: 105.7834
-  },
-  {
-    id: "S04",
-    name: "Trạm Hội Trường CS1",
-    campus: "CS1",
-    campusName: "CMC CS1 (Duy Tân - Cầu Giấy)",
-    building: "Hội trường A",
-    floor: "Tầng 1",
-    location: "Cổng chính Hội Trường Duy Tân",
-    types: ["paper", "plastic"],
-    status: "active",
-    capacity: 38,
-    lastCollected: "09:15 Hôm nay",
-    hours: "Khi có sự kiện",
-    lat: 21.0305,
-    lng: 105.7810
-  },
-  {
-    id: "S05",
-    name: "Trạm Co-Working CS1",
-    campus: "CS1",
-    campusName: "CMC CS1 (Duy Tân - Cầu Giấy)",
-    building: "Tòa Duy Tân",
-    floor: "Tầng 2",
-    location: "Khu không gian làm việc sinh viên Duy Tân",
-    types: ["paper", "plastic"],
-    status: "active",
-    capacity: 50,
-    lastCollected: "13:15 Hôm nay",
-    hours: "08:00 - 21:00",
-    lat: 21.0322,
-    lng: 105.7821
-  },
-  {
-    id: "S06",
-    name: "Trạm KTX Cầu Giấy",
-    campus: "CS1",
-    campusName: "CMC CS1 (Duy Tân - Cầu Giấy)",
-    building: "KTX Cầu Giấy",
-    floor: "Tầng 1",
-    location: "Cổng Khu nội trú Cầu Giấy",
-    types: ["paper", "plastic", "ewaste"],
-    status: "active",
-    capacity: 78,
-    lastCollected: "11:45 Hôm nay",
-    hours: "24/7",
-    lat: 21.0335,
-    lng: 105.7842
-  },
-  {
-    id: "S07",
-    name: "Trạm Cổng Trường CS1",
-    campus: "CS1",
-    campusName: "CMC CS1 (Duy Tân - Cầu Giấy)",
-    building: "Cổng Duy Tân",
-    floor: "Mặt đường",
-    location: "Mặt tiền Phố Duy Tân - Cầu Giấy",
-    types: ["plastic"],
-    status: "active",
-    capacity: 60,
-    lastCollected: "06:30 Hôm nay",
-    hours: "24/7",
-    lat: 21.0300,
-    lng: 105.7825
-  },
-
-  // === CMC CS2: Vạn Phúc, Hà Đông ===
-  {
-    id: "S08",
     name: "Trạm Thư Viện Central CS2",
     campus: "CS2",
     campusName: "CMC CS2 (Vạn Phúc - Hà Đông)",
-    building: "Thư viện CS2",
+    building: "Tòa Thư Viện CS2",
     floor: "Tầng 1",
-    location: "Trung tâm Thư Viện Vạn Phúc",
+    location: "Trung tâm Thư Viện Vạn Phúc - Hà Đông",
     types: ["paper", "plastic"],
     status: "active",
     capacity: 40,
@@ -177,7 +64,7 @@ const DEFAULT_STATIONS: Station[] = [
     lng: 105.7765
   },
   {
-    id: "S09",
+    id: "S02",
     name: "Trạm Căng Tin Tòa B CS2",
     campus: "CS2",
     campusName: "CMC CS2 (Vạn Phúc - Hà Đông)",
@@ -193,29 +80,13 @@ const DEFAULT_STATIONS: Station[] = [
     lng: 105.7752
   },
   {
-    id: "S10",
-    name: "Trạm Sân Thể Thao CS2",
-    campus: "CS2",
-    campusName: "CMC CS2 (Vạn Phúc - Hà Đông)",
-    building: "Sân vận động CS2",
-    floor: "Mặt sân",
-    location: "Khu Phức Hợp Thể Thao Vạn Phúc",
-    types: ["plastic"],
-    status: "active",
-    capacity: 65,
-    lastCollected: "12:00 Hôm nay",
-    hours: "06:00 - 22:00",
-    lat: 20.9796,
-    lng: 105.7774
-  },
-  {
-    id: "S11",
+    id: "S03",
     name: "Trạm Ký Túc Xá CS2",
     campus: "CS2",
     campusName: "CMC CS2 (Vạn Phúc - Hà Đông)",
     building: "KTX Hà Đông",
     floor: "Tầng 1",
-    location: "Khu nội trú Sinh Viên Hà Đông",
+    location: "Khu nội trú Sinh Viên Vạn Phúc",
     types: ["paper", "plastic", "ewaste"],
     status: "active",
     capacity: 70,
@@ -224,58 +95,60 @@ const DEFAULT_STATIONS: Station[] = [
     lat: 20.9770,
     lng: 105.7745
   },
+
+  // === CMC CS1: Duy Tân, Cầu Giấy (Focus 2) ===
   {
-    id: "S12",
-    name: "Trạm Innovation Hub CS2",
-    campus: "CS2",
-    campusName: "CMC CS2 (Vạn Phúc - Hà Đông)",
-    building: "Tòa Sáng Tạo",
-    floor: "Tầng 2",
-    location: "Trung Tâm Đổi Mới Sáng Tạo Hà Đông",
-    types: ["paper", "ewaste"],
-    status: "active",
-    capacity: 30,
-    lastCollected: "06:30 Hôm nay",
-    hours: "08:00 - 18:00",
-    lat: 20.9798,
-    lng: 105.7760
-  },
-  {
-    id: "S13",
-    name: "Trạm Bãi Xe CS2",
-    campus: "CS2",
-    campusName: "CMC CS2 (Vạn Phúc - Hà Đông)",
-    building: "Bãi xe CS2",
-    floor: "Mặt đất",
-    location: "Cổng Bãi Xe Sinh Viên Vạn Phúc",
-    types: ["plastic", "paper"],
+    id: "S04",
+    name: "Trạm Thư Viện CS1",
+    campus: "CS1",
+    campusName: "CMC CS1 (Duy Tân - Cầu Giấy)",
+    building: "Tòa Duy Tân",
+    floor: "Tầng 1",
+    location: "Sảnh Thư Viện - Khu tự học Cầu Giấy",
+    types: ["paper", "plastic"],
     status: "active",
     capacity: 45,
-    lastCollected: "13:00 Hôm nay",
-    hours: "06:00 - 22:30",
-    lat: 20.9765,
-    lng: 105.7762
+    lastCollected: "10:30 Hôm nay",
+    hours: "08:00 - 20:00",
+    lat: 21.0318,
+    lng: 105.7828
   },
   {
-    id: "S14",
-    name: "Trạm Eco Coffee Garden CS2",
-    campus: "CS2",
-    campusName: "CMC CS2 (Vạn Phúc - Hà Đông)",
-    building: "Khu Sân Vườn",
-    floor: "Mặt sân",
-    location: "Quán Cà Phê Sinh Viên Hà Đông",
+    id: "S05",
+    name: "Trạm Căng Tin CS1",
+    campus: "CS1",
+    campusName: "CMC CS1 (Duy Tân - Cầu Giấy)",
+    building: "Tòa Duy Tân",
+    floor: "Tầng B1",
+    location: "Khu ẩm thực Căng tin CS1 Cầu Giấy",
     types: ["plastic"],
     status: "full",
-    capacity: 95,
-    lastCollected: "15:00 Hôm qua",
-    hours: "07:30 - 22:00",
-    lat: 20.9785,
-    lng: 105.7780
+    capacity: 92,
+    lastCollected: "14:00 Hôm qua",
+    hours: "07:00 - 18:00",
+    lat: 21.0310,
+    lng: 105.7818
+  },
+  {
+    id: "S06",
+    name: "Trạm IT & AI Hub CS1",
+    campus: "CS1",
+    campusName: "CMC CS1 (Duy Tân - Cầu Giấy)",
+    building: "Tòa Công Nghệ",
+    floor: "Tầng 3",
+    location: "Hành lang Phòng Lab Máy Tính CS1",
+    types: ["ewaste"],
+    status: "active",
+    capacity: 25,
+    lastCollected: "Thứ 2 vừa rồi",
+    hours: "08:00 - 17:00",
+    lat: 21.0326,
+    lng: 105.7834
   }
 ];
 
 const RECENT_LOGS = [
-  { id: 1, text: "Sinh viên Nguyễn Minh Anh vừa phân loại 15 chai nhựa tại Trạm Thư Viện CS1", time: "2 phút trước", icon: Recycle },
+  { id: 1, text: "Sinh viên Nguyễn Minh Anh vừa phân loại 15 chai nhựa tại Trạm Thư Viện CS2", time: "2 phút trước", icon: Recycle },
   { id: 2, text: "Đội vệ sinh đã hoàn tất dọn dẹp sạch Trạm Ký Túc Xá CS2 (Hà Đông)", time: "15 phút trước", icon: Truck },
   { id: 3, text: "Trạm Căng Tin CS1 (Duy Tân) phát tín hiệu cảnh báo sức chứa 92%", time: "30 phút trước", icon: AlertTriangle },
   { id: 4, text: "Trần Đức Hùng đã nộp 3kg bìa carton tại Trạm Sảnh Tòa B CS2", time: "1 giờ trước", icon: CheckCircle2 },
@@ -284,11 +157,10 @@ const RECENT_LOGS = [
 export default function LiveMap() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedCampus, setSelectedCampus] = useState<"ALL" | "CS1" | "CS2">("ALL");
+  const [selectedCampus, setSelectedCampus] = useState<"ALL" | "CS1" | "CS2">("CS2");
   const [filter, setFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStationId, setSelectedStationId] = useState<string | null>("S01");
-  const [hoveredStation, setHoveredStation] = useState<Station | null>(null);
   const [mapType, setMapType] = useState<"google" | "satellite" | "osm">("google");
   const [localStations, setLocalStations] = useState<Station[]>(DEFAULT_STATIONS);
 
@@ -315,13 +187,13 @@ export default function LiveMap() {
     retry: 1
   });
 
-  // Sync server stations
+  // Sync server stations safely
   useEffect(() => {
     if (serverStations && Array.isArray(serverStations) && serverStations.length > 0) {
-      const mapped = serverStations.map((s, idx) => ({
+      const mapped = serverStations.slice(0, 6).map((s, idx) => ({
         ...s,
-        campus: s.campus || (idx < 7 ? 'CS1' : 'CS2'),
-        campusName: s.campusName || (idx < 7 ? 'CMC CS1 (Duy Tân - Cầu Giấy)' : 'CMC CS2 (Vạn Phúc - Hà Đông)'),
+        campus: s.campus || (idx < 3 ? 'CS2' : 'CS1'),
+        campusName: s.campusName || (idx < 3 ? 'CMC CS2 (Vạn Phúc - Hà Đông)' : 'CMC CS1 (Duy Tân - Cầu Giấy)'),
         lat: s.lat || DEFAULT_STATIONS[idx % DEFAULT_STATIONS.length].lat,
         lng: s.lng || DEFAULT_STATIONS[idx % DEFAULT_STATIONS.length].lng,
       }));
@@ -351,9 +223,9 @@ export default function LiveMap() {
     if (!navigator.geolocation) {
       toast({
         title: "Trình Duyệt Không Hỗ Trợ GPS",
-        description: "Mô phỏng vị trí của bạn tại cổng trường CMC CS1 (Duy Tân).",
+        description: "Mô phỏng vị trí của bạn tại cổng trường CMC CS2 (Vạn Phúc).",
       });
-      setUserPositionFallback(21.0315, 105.7825);
+      setUserPositionFallback(20.9785, 105.7760);
       setIsLocating(false);
       return;
     }
@@ -366,12 +238,11 @@ export default function LiveMap() {
         setIsLocating(false);
       },
       (err) => {
-        // Fallback to CS1 location if denied
         toast({
           title: "Vị Trí Định Vị",
-          description: "Mô phỏng vị trí của bạn tại CMC Cơ sở 1 Duy Tân.",
+          description: "Mô phỏng vị trí của bạn tại CMC Cơ sở 2 Vạn Phúc.",
         });
-        setUserPositionFallback(21.0315, 105.7825);
+        setUserPositionFallback(20.9785, 105.7760);
         setIsLocating(false);
       },
       { timeout: 5000 }
@@ -449,23 +320,23 @@ export default function LiveMap() {
         if (s.id === stationId) {
           return {
             ...s,
-            capacity: 10,
+            capacity: 0,
             status: 'active',
-            lastCollected: 'Vừa dọn sạch xong'
+            lastCollected: "Vừa xong"
           };
         }
         return s;
       }));
 
       toast({
-        title: "Đã Báo Thu Gom! 🚚",
-        description: data.message || "Trạm rác đã được dọn sạch về mức 10%.",
+        title: "Báo Dọn Dẹp Thành Công! 🚛",
+        description: "Thông báo đã được gửi đến Đội xử lý rác AI Campus CMC.",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/stations'] });
     }
   });
 
-  // Simulate Waste Input (+20%)
+  // Simulation: Add Waste to Station
   const handleSimulateAddWaste = (stationId: string) => {
     setLocalStations(prev => prev.map(s => {
       if (s.id === stationId) {
@@ -473,27 +344,27 @@ export default function LiveMap() {
         return {
           ...s,
           capacity: newCap,
-          status: newCap >= 85 ? 'full' : s.status
+          status: newCap >= 85 ? 'full' : 'active'
         };
       }
       return s;
     }));
 
     toast({
-      title: "Mô Phỏng Nộp Rác ♻️",
-      description: "Đã cộng +20% lượng rác để cập nhật thông số theo thời gian thực.",
+      title: "Mô Phỏng Rác Đổ Về (+20%) ⚡",
+      description: "Sức chứa trạm đã cập nhật theo thời gian thực.",
     });
   };
 
-  // Initialize Leaflet Map
+  // Initialize Leaflet Map Centered at CMC CS2 (Vạn Phúc)
   useEffect(() => {
-    if (!mapRef.current) return;
-    if (leafletMap.current) return;
+    if (!mapRef.current || leafletMap.current) return;
 
+    // Centered between CS2 and CS1
     const map = L.map(mapRef.current, {
-      center: [21.0315, 105.7825], // Default center on CS1 Duy Tân
-      zoom: 15,
-      zoomControl: false,
+      center: [20.9785, 105.7760],
+      zoom: 16,
+      zoomControl: false
     });
 
     const tileUrl = "https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}";
@@ -569,22 +440,19 @@ export default function LiveMap() {
       const isSelected = selectedStationId === station.id;
       const isFull = station.capacity >= 85;
 
-      // Short name for compact marker display without overlap (e.g. "Trạm Thư Viện CS1" -> "Thư Viện")
-      const shortName = station.name.replace("Trạm ", "").replace(" CS1", "").replace(" CS2", "").replace(" Central", "");
-
       const markerHtml = `
         <div class="relative flex items-center justify-center cursor-pointer group">
           ${isFull ? '<div class="absolute -inset-2 rounded-full bg-rose-500/50 animate-ping"></div>' : ''}
-          <div class="px-2.5 py-1 rounded-full font-extrabold text-[11px] shadow-md flex items-center gap-1 transition-all transform group-hover:scale-110 group-hover:z-50 whitespace-nowrap ${
+          <div class="px-3 py-1.5 rounded-full font-extrabold text-[11px] shadow-lg flex items-center gap-1.5 transition-all transform group-hover:scale-110 group-hover:z-50 whitespace-nowrap ${
             isSelected 
-              ? 'bg-emerald-600 text-white ring-4 ring-emerald-400/80 scale-105 z-50 shadow-emerald-500/40' 
+              ? 'bg-emerald-600 text-white ring-4 ring-emerald-400/80 scale-110 z-50 shadow-emerald-500/50 border-2 border-white' 
               : isFull 
               ? 'bg-rose-600 text-white border border-white' 
               : 'bg-emerald-800/90 text-white border border-white/80 backdrop-blur-sm'
           }">
-            <span class="w-2 h-2 rounded-full ${isFull ? 'bg-amber-300 animate-pulse' : 'bg-emerald-300'}"></span>
-            <span>${shortName}</span>
-            <span class="bg-black/35 px-1 py-0.2 rounded text-[10px] font-mono font-bold">${station.capacity}%</span>
+            <span class="w-2.5 h-2.5 rounded-full ${isFull ? 'bg-amber-300 animate-pulse' : 'bg-emerald-300'}"></span>
+            <span>${station.name}</span>
+            <span class="bg-black/40 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold">${station.capacity}%</span>
           </div>
         </div>
       `;
@@ -592,30 +460,29 @@ export default function LiveMap() {
       const customIcon = L.divIcon({
         html: markerHtml,
         className: 'custom-leaflet-marker',
-        iconSize: [95, 26],
-        iconAnchor: [47, 13],
+        iconSize: [140, 30],
+        iconAnchor: [70, 15],
       });
 
       const marker = L.marker([station.lat, station.lng], { icon: customIcon }).addTo(map);
 
-      marker.on('mouseover', () => setHoveredStation(station));
-      marker.on('mouseout', () => setHoveredStation(null));
       marker.on('click', () => {
         setSelectedStationId(station.id);
-        map.flyTo([station.lat, station.lng], 18, { duration: 0.8 });
+        map.flyTo([station.lat, station.lng], 17, { duration: 0.8 });
       });
 
       markersRef.current[station.id] = marker;
     });
   }, [localStations, selectedCampus, filter, searchQuery, selectedStationId]);
 
+  // Guaranteed 100% synchronized active station for bottom panel & card clicks!
   const activeStation = localStations.find(s => s.id === selectedStationId) || localStations[0];
-  const displayStation = hoveredStation || activeStation;
+  const displayStation = activeStation;
 
   const handleSelectCard = (s: Station) => {
     setSelectedStationId(s.id);
     if (leafletMap.current) {
-      leafletMap.current.flyTo([s.lat, s.lng], 18, { duration: 0.8 });
+      leafletMap.current.flyTo([s.lat, s.lng], 17, { duration: 0.8 });
     }
   };
 
@@ -644,12 +511,12 @@ export default function LiveMap() {
               <Building2 className="w-4 h-4 text-emerald-600" /> Chọn Cơ Sở:
             </span>
             <button
-              onClick={() => handleSelectCampusTab("ALL")}
+              onClick={() => handleSelectCampusTab("CS2")}
               className={`px-4 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap transition-all ${
-                selectedCampus === 'ALL' ? 'bg-emerald-600 text-white shadow-md' : 'bg-secondary text-muted-foreground hover:bg-secondary/80'
+                selectedCampus === 'CS2' ? 'bg-emerald-600 text-white shadow-md' : 'bg-secondary text-muted-foreground hover:bg-secondary/80'
               }`}
             >
-              Tất Cả Cơ Sở (14 Trạm)
+              🏫 CMC CS2 (Vạn Phúc - Hà Đông)
             </button>
             <button
               onClick={() => handleSelectCampusTab("CS1")}
@@ -657,124 +524,100 @@ export default function LiveMap() {
                 selectedCampus === 'CS1' ? 'bg-emerald-600 text-white shadow-md' : 'bg-secondary text-muted-foreground hover:bg-secondary/80'
               }`}
             >
-              🏢 CMC Cơ Sở 1 (Duy Tân - Cầu Giấy)
+              🏢 CMC CS1 (Duy Tân - Cầu Giấy)
             </button>
             <button
-              onClick={() => handleSelectCampusTab("CS2")}
+              onClick={() => handleSelectCampusTab("ALL")}
               className={`px-4 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap transition-all ${
-                selectedCampus === 'CS2' ? 'bg-emerald-600 text-white shadow-md' : 'bg-secondary text-muted-foreground hover:bg-secondary/80'
+                selectedCampus === 'ALL' ? 'bg-emerald-600 text-white shadow-md' : 'bg-secondary text-muted-foreground hover:bg-secondary/80'
               }`}
             >
-              🏫 CMC Cơ Sở 2 (Vạn Phúc - Hà Đông)
+              🌐 Tất Cả 2 Cơ Sở
             </button>
           </div>
 
-          <button
-            onClick={handleLocateUser}
-            disabled={isLocating}
-            className="w-full lg:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 text-white font-extrabold rounded-2xl text-xs hover:bg-blue-700 transition-all shadow-md active:scale-95 disabled:opacity-50"
-          >
-            <LocateFixed className={`w-4 h-4 ${isLocating ? 'animate-spin' : ''}`} />
-            {isLocating ? 'Đang Định Vị GPS...' : '📍 Vị Trí Của Tôi (Xem Trạm Gần Nhất)'}
-          </button>
-        </div>
-
-        {/* GPS Nearest Station Alert Banner */}
-        {nearestStationInfo && (
-          <motion.div 
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-3 text-foreground"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-md">
-                <Navigation className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="font-extrabold text-sm text-blue-700 dark:text-blue-400">
-                  Trạm rác gần vị trí của bạn nhất: <span className="underline">{nearestStationInfo.station.name}</span>
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Khoảng cách: <strong className="text-foreground">{nearestStationInfo.distanceMeters} mét</strong> • Vị trí: {nearestStationInfo.station.location} • Sức chứa hiện tại: {nearestStationInfo.station.capacity}%
-                </p>
-              </div>
-            </div>
+          <div className="flex items-center gap-3 w-full lg:w-auto justify-end">
+            <button
+              onClick={handleLocateUser}
+              disabled={isLocating}
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow transition-all flex items-center gap-1.5 active:scale-95 disabled:opacity-50"
+            >
+              <LocateFixed className={`w-4 h-4 ${isLocating ? 'animate-spin' : ''}`} />
+              {isLocating ? "Đang định vị GPS..." : "Định Vị Vị Trí Của Tôi 📍"}
+            </button>
 
             <button
-              onClick={() => openGoogleMapsDirections(nearestStationInfo.station.lat, nearestStationInfo.station.lng)}
-              className="px-4 py-2 bg-blue-600 text-white font-bold text-xs rounded-xl hover:bg-blue-700 transition-colors shadow-sm flex items-center gap-1"
+              onClick={() => refetch()}
+              className="p-2 bg-secondary hover:bg-secondary/80 text-foreground border border-border rounded-xl transition-all"
+              title="Làm mới dữ liệu trạm"
             >
-              Chỉ Đường Google Maps <ExternalLink className="w-3.5 h-3.5" />
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
             </button>
-          </motion.div>
-        )}
+          </div>
+        </div>
 
-        {/* Main Map Box Container */}
-        <div className="w-full h-[650px] md:h-[700px] flex flex-col md:flex-row shadow-2xl rounded-3xl border border-border overflow-hidden bg-card relative">
+        {/* Main Map Split Interface */}
+        <div className="flex flex-col lg:flex-row h-[720px] rounded-3xl overflow-hidden border border-border bg-card shadow-2xl">
           
-          {/* Left Sidebar */}
-          <div className="w-full md:w-96 bg-card border-r border-border flex flex-col h-full z-10">
+          {/* Left Sidebar: Search, Filters & Stations List */}
+          <div className="w-full lg:w-96 border-r border-border bg-card flex flex-col h-full z-10 shrink-0">
             
-            {/* Header Controls */}
-            <div className="p-4 md:p-5 border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-20 space-y-3">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h1 className="text-xl md:text-2xl font-black font-sans tracking-tight text-foreground flex items-center gap-2">
-                    <MapPin className="w-6 h-6 text-emerald-600" /> Trạm Thu Gom ({filteredStations.length})
-                  </h1>
-                  <p className="text-xs text-muted-foreground">Phân bổ CS1 Cầu Giấy & CS2 Hà Đông</p>
-                </div>
-                <button 
-                  onClick={() => refetch()} 
-                  className="p-2.5 rounded-xl bg-secondary hover:bg-secondary/80 transition-colors text-foreground"
-                  title="Làm mới dữ liệu từ máy chủ"
-                >
-                  <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-emerald-600' : ''}`} />
-                </button>
-              </div>
-
-              {/* Search input */}
+            {/* Search Input Box */}
+            <div className="p-4 border-b border-border space-y-3">
               <div className="relative">
-                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <Search className="w-4 h-4 absolute left-3.5 top-3 text-muted-foreground" />
                 <input
                   type="text"
                   placeholder="Tìm tên trạm, vị trí..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-secondary/60 border border-border/60 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:bg-background outline-none transition-all"
+                  className="w-full pl-9 pr-4 py-2 bg-secondary border border-border rounded-xl text-xs font-bold text-foreground outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
-              
-              {/* Filter buttons */}
-              <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
-                {[
-                  { id: "all", label: "Tất cả" },
-                  { id: "full", label: `Sắp đầy (${fullStationsCount})` },
-                  { id: "plastic", label: "Chai Nhựa" },
-                  { id: "paper", label: "Giấy Carton" },
-                  { id: "ewaste", label: "Điện Tử" },
-                ].map(item => (
-                  <button 
-                    key={item.id}
-                    onClick={() => setFilter(item.id)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
-                      filter === item.id 
-                        ? 'bg-emerald-600 text-white shadow-md' 
-                        : 'bg-secondary/60 text-muted-foreground hover:bg-secondary hover:text-foreground'
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                ))}
+
+              {/* Category Filter Pills */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-hide text-[11px]">
+                <button
+                  onClick={() => setFilter("all")}
+                  className={`px-3 py-1.5 rounded-lg font-bold whitespace-nowrap transition-all ${
+                    filter === 'all' ? 'bg-emerald-600 text-white shadow' : 'bg-secondary text-muted-foreground hover:bg-secondary/80'
+                  }`}
+                >
+                  Tất cả ({localStations.length})
+                </button>
+                <button
+                  onClick={() => setFilter("full")}
+                  className={`px-3 py-1.5 rounded-lg font-bold whitespace-nowrap transition-all ${
+                    filter === 'full' ? 'bg-rose-600 text-white shadow' : 'bg-secondary text-muted-foreground hover:bg-secondary/80'
+                  }`}
+                >
+                  Sắp đầy ({fullStationsCount})
+                </button>
+                <button
+                  onClick={() => setFilter("plastic")}
+                  className={`px-3 py-1.5 rounded-lg font-bold whitespace-nowrap transition-all ${
+                    filter === 'plastic' ? 'bg-emerald-600 text-white shadow' : 'bg-secondary text-muted-foreground hover:bg-secondary/80'
+                  }`}
+                >
+                  Chai Nhựa
+                </button>
+                <button
+                  onClick={() => setFilter("paper")}
+                  className={`px-3 py-1.5 rounded-lg font-bold whitespace-nowrap transition-all ${
+                    filter === 'paper' ? 'bg-emerald-600 text-white shadow' : 'bg-secondary text-muted-foreground hover:bg-secondary/80'
+                  }`}
+                >
+                  Giấy Carton
+                </button>
               </div>
             </div>
 
-            {/* List of Stations */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+            {/* Stations Scrollable List */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-thin">
               {filteredStations.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground text-xs space-y-2">
-                  <AlertTriangle className="w-8 h-8 text-amber-500 mx-auto" />
-                  <p>Không tìm thấy trạm thu gom phù hợp</p>
+                <div className="p-8 text-center space-y-2 text-muted-foreground">
+                  <AlertTriangle className="w-8 h-8 mx-auto text-amber-500" />
+                  <p className="text-xs font-bold">Không tìm thấy trạm thu gom phù hợp</p>
                 </div>
               ) : (
                 filteredStations.map((station) => {
@@ -785,8 +628,6 @@ export default function LiveMap() {
                     <motion.div
                       key={station.id}
                       onClick={() => handleSelectCard(station)}
-                      onMouseEnter={() => setHoveredStation(station)}
-                      onMouseLeave={() => setHoveredStation(null)}
                       whileHover={{ scale: 1.01 }}
                       className={`p-4 rounded-2xl border cursor-pointer transition-all ${
                         isSelected 
@@ -902,7 +743,7 @@ export default function LiveMap() {
             {/* Leaflet Map Div Container */}
             <div ref={mapRef} className="w-full h-full z-0 bg-slate-200" />
 
-            {/* Live Hover Inspection Dashboard */}
+            {/* Guaranteed 100% Synchronized Bottom Detail Panel */}
             <AnimatePresence>
               {displayStation && (
                 <motion.div
@@ -962,9 +803,9 @@ export default function LiveMap() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-border pb-4 gap-4">
             <div>
               <h2 className="text-2xl font-black text-foreground flex items-center gap-2 font-sans tracking-tight">
-                <Activity className="w-6 h-6 text-emerald-600" /> Thống Kê Phủ Sóng CS1 Duy Tân & CS2 Vạn Phúc
+                <Activity className="w-6 h-6 text-emerald-600" /> Thống Kê Phủ Sóng CS2 Vạn Phúc & CS1 Duy Tân
               </h2>
-              <p className="text-sm text-muted-foreground">Tổng hợp dữ liệu phân loại rác thải thực tế toàn bộ 2 cơ sở trường CMC</p>
+              <p className="text-sm text-muted-foreground">Tổng hợp dữ liệu phân loại rác thải thực tế 2 cơ sở trường CMC</p>
             </div>
             <div className="flex items-center gap-2 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-bold px-3 py-1.5 rounded-full text-xs border border-emerald-500/20">
               <Radio className="w-3.5 h-3.5 animate-pulse text-emerald-600" /> Tín hiệu GPS & Trạm Sensor thời gian thực
@@ -979,7 +820,7 @@ export default function LiveMap() {
                 <MapPin className="w-5 h-5 text-emerald-600" />
               </div>
               <p className="text-3xl font-black font-mono text-foreground">{localStations.length} Trạm</p>
-              <p className="text-xs text-emerald-600 font-bold">✓ CS1: 7 trạm | CS2: 7 trạm</p>
+              <p className="text-xs text-emerald-600 font-bold">✓ CS2: 3 trạm | CS1: 3 trạm</p>
             </div>
 
             <div className="bg-card border border-border p-6 rounded-3xl shadow-sm space-y-2 hover:border-emerald-500/40 transition-all">
