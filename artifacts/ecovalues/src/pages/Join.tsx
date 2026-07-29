@@ -133,7 +133,7 @@ export default function Join() {
     return () => clearInterval(timer);
   }, [resendTimer]);
 
-  // Send real dynamic OTP email
+  // Send real dynamic OTP email via Vercel Serverless & Express API
   const handleSendOtp = async () => {
     if (!email.includes("@")) {
       toast({
@@ -180,7 +180,7 @@ export default function Join() {
 
       toast({
         title: "Đã Gửi Mã OTP Xác Thực! 📨",
-        description: `Hệ thống đã gửi mã OTP 6 số về hòm thư Gmail ${email}. Vui lòng kiểm tra Hộp thư đến.`,
+        description: `Hệ thống đã phát hành mã OTP gửi tới Gmail ${email}. Vui lòng kiểm tra Hộp thư đến (hoặc Thư rác/Spam).`,
       });
     } catch (err: any) {
       const fallbackCode = Math.floor(100000 + Math.random() * 900000).toString();
@@ -679,7 +679,7 @@ export default function Join() {
                               <div className="space-y-0.5">
                                 <p className="font-extrabold text-emerald-700">Đã Gửi OTP Đến Gmail Của Bạn ✉️</p>
                                 <p className="text-[11px] text-muted-foreground leading-relaxed">
-                                  Hệ thống đã phát hành mã OTP xác thực 6 số gửi về hòm thư Gmail <strong className="text-foreground">{email}</strong>. Vui lòng kiểm tra Gmail và nhập mã bên dưới.
+                                  Hệ thống đã phát hành mã OTP xác thực 6 số gửi từ hòm thư Gmail đại sứ <strong className="text-emerald-700 font-mono">quangdung6189@gmail.com</strong> tới địa chỉ <strong className="text-foreground">{email}</strong>. Vui lòng kiểm tra Hộp thư đến hoặc thư mục <strong>Thư Rác (Spam)</strong>.
                                 </p>
                               </div>
                             </div>
