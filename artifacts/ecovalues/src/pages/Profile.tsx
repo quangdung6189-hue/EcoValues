@@ -41,7 +41,90 @@ export default function Profile() {
   const [newPassInput, setNewPassInput] = useState("");
   const [confirmPassInput, setConfirmPassInput] = useState("");
 
-  // If user is not logged in, show Auth Gate Notice
+  // Daily Check-in state persisted per user per date
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const checkInKey = user ? `ecovalues_checkin_${user.email}_${todayStr}` : "";
+
+  const [hasCheckedInToday, setHasCheckedInToday] = useState<boolean>(() => {
+    return checkInKey ? localStorage.getItem(checkInKey) === "true" : false;
+  });
+
+  const [checkInStreak, setCheckInStreak] = useState<number>(4);
+
+  // Active Sub-tab inside Profile Page: "wallet" | "recycle_history" | "vouchers" | "privileges" | "security"
+  const [activeTab, setActiveTab] = useState<"wallet" | "recycle_history" | "vouchers" | "privileges" | "security">("wallet");
+
+  // Modals state
+  const [showRankModal, setShowRankModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+
+  // Edit Profile Form state
+  const [editName, setEditName] = useState(user?.name || "");
+  const [editStudentId, setEditStudentId] = useState(user?.studentId || "");
+  const [editMajor, setEditMajor] = useState(user?.major || "");
+
+  // Persistent Avatar State per User Account
+  const avatarKey = user ? `ecovalues_avatar_${user.email}` : "";
+  const [avatarUrl, setAvatarUrl] = useState<string>(() => {
+    const saved = avatarKey ? localStorage.getItem(avatarKey) : null;
+    return saved || user?.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400";
+  });
+
+  useEffect(() => {
+    if (!user) return;
+    const saved = localStorage.getItem(`ecovalues_avatar_${user.email}`);
+    if (saved) {
+      setAvatarUrl(saved);
+    } else if (user.avatar) {
+      setAvatarUrl(user.avatar);
+    } else {
+      setAvatarUrl("https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400");
+    }
+  }, [user]);
+
+  // Copy voucher code state
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
+
+  // User-isolated Transaction History
+  const txKey = user ? `ecovalues_tx_${user.email}` : "";
+  const [pointTransactions, setPointTransactions] = useState(() => {
+    if (!txKey) return [];
+    const saved = localStorage.getItem(txKey);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {}
+    }
+    return [
+      { id: 1, type: "plus", title: "Thưởng thành viên mới (Hạng Đồng)", date: "Hôm nay, 08:00", points: "+100 pt" }
+    ];
+  });
+
+  // User-isolated Vouchers
+  const voucherKey = user ? `ecovalues_vouchers_${user.email}` : "";
+  const [myVouchers, setMyVouchers] = useState(() => {
+    if (!voucherKey) return [];
+    const saved = localStorage.getItem(voucherKey);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {}
+    }
+    return [];
+  });
+
+  // Handle Logout without white screen crash
+  const handleLogout = () => {
+    logout();
+    toast({
+      title: "Đã Đăng Xuất 👋",
+      description: "Hẹn gặp lại bạn trong các hoạt động tích điểm tiếp theo!",
+    });
+    window.location.href = "/";
+  };
+
+  // If user is not logged in, show Auth Gate Notice AFTER ALL HOOKS
   if (!isLoggedIn || !user) {
     return (
       <MainLayout>
@@ -69,85 +152,6 @@ export default function Profile() {
   }
 
   const currentUser = user;
-
-  // Daily Check-in state persisted per user per date
-  const todayStr = new Date().toISOString().slice(0, 10);
-  const checkInKey = user ? `ecovalues_checkin_${user.email}_${todayStr}` : "";
-
-  const [hasCheckedInToday, setHasCheckedInToday] = useState<boolean>(() => {
-    return checkInKey ? localStorage.getItem(checkInKey) === "true" : false;
-  });
-
-  const [checkInStreak, setCheckInStreak] = useState<number>(4);
-
-  // Active Sub-tab inside Profile Page: "wallet" | "recycle_history" | "vouchers" | "privileges" | "security"
-  const [activeTab, setActiveTab] = useState<"wallet" | "recycle_history" | "vouchers" | "privileges" | "security">("wallet");
-
-  // Modals state
-  const [showRankModal, setShowRankModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showHistoryModal, setShowHistoryModal] = useState(false);
-
-  // Edit Profile Form state
-  const [editName, setEditName] = useState(currentUser.name);
-  const [editStudentId, setEditStudentId] = useState(currentUser.studentId);
-  const [editMajor, setEditMajor] = useState(currentUser.major);
-
-  // Persistent Avatar State per User Account
-  const avatarKey = `ecovalues_avatar_${currentUser.email}`;
-  const [avatarUrl, setAvatarUrl] = useState<string>(() => {
-    const saved = localStorage.getItem(avatarKey);
-    return saved || currentUser.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400";
-  });
-
-  useEffect(() => {
-    const saved = localStorage.getItem(avatarKey);
-    if (saved) {
-      setAvatarUrl(saved);
-    } else if (currentUser.avatar) {
-      setAvatarUrl(currentUser.avatar);
-    } else {
-      setAvatarUrl("https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400");
-    }
-  }, [currentUser.email, currentUser.avatar, avatarKey]);
-
-  // Copy voucher code state
-  const [copiedCode, setCopiedCode] = useState<string | null>(null);
-
-  // User-isolated Transaction History
-  const txKey = `ecovalues_tx_${currentUser.email}`;
-  const [pointTransactions, setPointTransactions] = useState(() => {
-    const saved = localStorage.getItem(txKey);
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {}
-    }
-    return [
-      { id: 1, type: "plus", title: "Thưởng thành viên mới (Hạng Đồng)", date: "Hôm nay, 08:00", points: "+100 pt" }
-    ];
-  });
-
-  // User-isolated Vouchers
-  const voucherKey = `ecovalues_vouchers_${currentUser.email}`;
-  const [myVouchers, setMyVouchers] = useState(() => {
-    const saved = localStorage.getItem(voucherKey);
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {}
-    }
-    return [];
-  });
-
-  // Handle Logout
-  const handleLogout = () => {
-    logout();
-    toast({
-      title: "Đã Đăng Xuất 👋",
-      description: "Hẹn gặp lại bạn trong các hoạt động tích điểm tiếp theo!",
-    });
-  };
 
   // Handle Copy Voucher Code
   const handleCopyCode = (code: string) => {
