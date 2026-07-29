@@ -11,46 +11,89 @@ export function Navbar() {
 
   // Notification State
   const [showNotifPopover, setShowNotifPopover] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(3);
+  const [unreadCount, setUnreadCount] = useState(2);
 
-  const notifications = [
-    {
+  // Generate 100% Dynamic Notifications per Logged in User
+  const getDynamicNotifications = () => {
+    if (!user) return [];
+    
+    const pts = user.points;
+    let rankNotif = {
       id: 1,
-      title: "🎁 Voucher Highlands Coffee 100k Mới!",
-      desc: "Quà tặng giá trị mới ra mắt tại cửa hàng đổi điểm.",
+      title: "🎉 Chào Mừng Hạng Đồng 🥉",
+      desc: `Bạn bắt đầu với +${pts} pt thưởng ban đầu. Hãy tích điểm để lên Hạng Bạc!`,
       time: "Vừa xong",
       read: false,
-      icon: Gift,
-      color: "text-amber-500 bg-amber-500/10"
-    },
-    {
-      id: 2,
-      title: "⚡ Trạm Căng Tin CS1 Đã Đầy 92%",
-      desc: "Đơn vị thu gom đang trên đường tới xử lý rác AI.",
-      time: "15 phút trước",
-      read: false,
-      icon: Zap,
-      color: "text-rose-500 bg-rose-500/10"
-    },
-    {
-      id: 3,
-      title: "🎉 Nhận +50 Điểm Danh Hôm Nay",
-      desc: "Bạn vừa hoàn thành chuỗi 5 ngày điểm danh liên tiếp.",
-      time: "Hôm nay, 08:30",
-      read: false,
       icon: Sparkles,
-      color: "text-emerald-600 bg-emerald-500/10"
-    },
-    {
-      id: 4,
-      title: "🏆 Đạt 83% Tiến Trình Hạng Kim Cương",
-      desc: "Tích thêm +250 pt nữa để mở khóa đặc quyền X2 điểm.",
-      time: "Hôm qua",
-      read: true,
-      icon: Trophy,
-      color: "text-cyan-600 bg-cyan-500/10"
+      color: "text-amber-600 bg-amber-500/10"
+    };
+
+    if (pts >= 3000) {
+      rankNotif = {
+        id: 1,
+        title: "👑 Đạt Hạng VIP Huyền Thoại!",
+        desc: "Bạn đã mở khóa tất cả đặc quyền vinh danh Top Campus CMC.",
+        time: "Vừa xong",
+        read: false,
+        icon: Trophy,
+        color: "text-purple-600 bg-purple-500/10"
+      };
+    } else if (pts >= 1500) {
+      rankNotif = {
+        id: 1,
+        title: "💎 Đạt Hạng Kim Cương!",
+        desc: "Mở khóa X2 điểm thưởng thu gom rác AI tại trạm.",
+        time: "Vừa xong",
+        read: false,
+        icon: Trophy,
+        color: "text-cyan-600 bg-cyan-500/10"
+      };
+    } else if (pts >= 1000) {
+      rankNotif = {
+        id: 1,
+        title: "🥇 Đạt Hạng Vàng!",
+        desc: "Mở khóa Giấy chứng nhận Tình nguyện viên & đổi bình nước tre Eco.",
+        time: "Vừa xong",
+        read: false,
+        icon: Award,
+        color: "text-amber-500 bg-amber-500/10"
+      };
+    } else if (pts >= 500) {
+      rankNotif = {
+        id: 1,
+        title: "🥈 Đạt Hạng Bạc!",
+        desc: "Nhận ưu đãi giảm 5% giá đổi quà tặng trên toàn hệ thống.",
+        time: "Vừa xong",
+        read: false,
+        icon: Award,
+        color: "text-slate-500 bg-slate-500/10"
+      };
     }
-  ];
+
+    return [
+      rankNotif,
+      {
+        id: 2,
+        title: "🎁 Cửa Hàng Đổi Quà Mới Cập Nhật",
+        desc: "Bổ sung Voucher Highlands 100k, Áo thun Eco & Balo tre cao cấp.",
+        time: "Hôm nay",
+        read: false,
+        icon: Gift,
+        color: "text-emerald-600 bg-emerald-500/10"
+      },
+      {
+        id: 3,
+        title: "⚡ Trạm Thu Gom CS1 & CS2 Đã Hoạt Động",
+        desc: "14 trạm phân loại rác thông minh sẵn sàng tiếp nhận tích điểm.",
+        time: "Hôm nay",
+        read: false,
+        icon: Zap,
+        color: "text-rose-500 bg-rose-500/10"
+      }
+    ];
+  };
+
+  const userNotifications = getDynamicNotifications();
 
   const handleMarkAllRead = () => {
     setUnreadCount(0);
@@ -138,7 +181,7 @@ export function Navbar() {
                 {isLoggedIn && user ? (
                   <>
                     <div className="space-y-2 max-h-80 overflow-y-auto pr-1 scrollbar-thin">
-                      {notifications.map((n) => (
+                      {userNotifications.map((n) => (
                         <div 
                           key={n.id} 
                           className={`p-3 rounded-2xl border text-xs flex gap-3 transition-all ${
@@ -246,7 +289,7 @@ export function Navbar() {
                 className="p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex justify-between items-center group cursor-pointer"
               >
                 <div>
-                  <p className="font-bold text-xs text-foreground group-hover:text-emerald-600 transition-colors">👤 {user.name} (Hội viên Vàng)</p>
+                  <p className="font-bold text-xs text-foreground group-hover:text-emerald-600 transition-colors">👤 {user.name}</p>
                   <p className="text-xs text-emerald-600 font-mono font-black">{user.points} điểm xanh ➔ Vào Hồ Sơ</p>
                 </div>
                 <div className="p-1.5 bg-emerald-600 text-white rounded-full">
