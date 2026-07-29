@@ -63,7 +63,7 @@ interface Reward {
 export default function GreenPoints() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { user, isLoggedIn, login, logout, updatePoints } = useAuth();
+  const { user, isLoggedIn, login, logout, updatePoints, isEmailRegistered, registerUserAccount } = useAuth();
 
   // Auth Modal State
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -269,28 +269,34 @@ export default function GreenPoints() {
 
   // Register final submission
   const handleRegisterSubmit = () => {
-    const finalName = authName || "Nguyễn Minh Anh";
+    const finalName = authName || "Thành Viên EcoValues";
     const finalStudentId = authStudentId.trim() || (authRole === "teacher" ? `GV-${Math.floor(100000 + Math.random() * 900000)}` : `CMC-${Math.floor(100000 + Math.random() * 900000)}`);
 
-    const loggedUser = login(finalName, authEmail, finalStudentId, authMajor, 2450);
+    if (isEmailRegistered(authEmail)) {
+      toast({
+        title: "Email Đã Tồn Tại ⚠️",
+        description: `Hòm thư ${authEmail} đã được đăng ký tài khoản trước đó. Vui lòng chọn Đăng Nhập.`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const res = registerUserAccount(finalName, authEmail, finalStudentId, authMajor, authPassword, 100);
+    if (!res.success) {
+      toast({
+        title: "Đăng Ký Thất Bại ⚠️",
+        description: res.message,
+        variant: "destructive"
+      });
+      return;
+    }
+
     setShowAuthModal(false);
     resetRegisterFlow();
 
-    // Fire API call to save on Supabase
-    fetch('/api/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: finalName,
-        email: authEmail,
-        studentId: finalStudentId,
-        major: authMajor
-      })
-    }).catch(() => {});
-
     toast({
-      title: "Đăng Ký Tài Khoản Thành Công! 🎉",
-      description: `Chào mừng ${loggedUser.name} đã gia nhập Đại sứ Xanh CMC. Bạn nhận được +2450 điểm thưởng ban đầu.`,
+      title: "Đăng Ký Thành Công! 🥉",
+      description: `Chào mừng ${res.user?.name} đã gia nhập Đại Sứ Xanh. Bạn bắt đầu từ Hạng Đồng (+100 pt ban đầu).`,
     });
   };
 
