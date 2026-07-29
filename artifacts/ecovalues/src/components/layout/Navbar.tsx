@@ -129,6 +129,7 @@ export function Navbar() {
             <Link
               key={link.href}
               href={link.href}
+              onClick={() => window.scrollTo({ top: 0, left: 0, behavior: 'instant' })}
               className={cn(
                 "text-sm font-medium transition-colors hover:text-emerald-600",
                 location === link.href ? "text-emerald-600 font-bold" : "text-muted-foreground"
