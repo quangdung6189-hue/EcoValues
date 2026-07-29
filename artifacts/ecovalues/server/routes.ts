@@ -176,8 +176,8 @@ export function registerRoutes(app: Express) {
       const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
       otpCache.set(email, { code: otpCode, expires: Date.now() + 10 * 60 * 1000 }); // 10 mins
 
-      const smtpUser = process.env.GMAIL_USER || "quangdung6189@gmail.com";
-      const smtpPass = process.env.GMAIL_PASS || "oxlqgekhistqzlve";
+      const smtpUser = process.env.GMAIL_USER || "ecovalous@gmail.com";
+      const smtpPass = process.env.GMAIL_PASS || "cmwrnwajkmmprzpl";
 
       const transporter = nodemailer.createTransport({
         service: 'gmail',

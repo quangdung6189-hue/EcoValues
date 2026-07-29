@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Leaf, Menu, X, User, LogOut, Lock, Award, Sparkles } from "lucide-react";
+import { Leaf, Menu, X, User, LogOut, Lock, Award, Sparkles, Bell, Check, Gift, Zap, Trophy, ShieldAlert } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
@@ -8,6 +8,53 @@ export function Navbar() {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, isLoggedIn, logout } = useAuth();
+
+  // Notification State
+  const [showNotifPopover, setShowNotifPopover] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(3);
+
+  const notifications = [
+    {
+      id: 1,
+      title: "🎁 Voucher Highlands Coffee 100k Mới!",
+      desc: "Quà tặng giá trị mới ra mắt tại cửa hàng đổi điểm.",
+      time: "Vừa xong",
+      read: false,
+      icon: Gift,
+      color: "text-amber-500 bg-amber-500/10"
+    },
+    {
+      id: 2,
+      title: "⚡ Trạm Căng Tin CS1 Đã Đầy 92%",
+      desc: "Đơn vị thu gom đang trên đường tới xử lý rác AI.",
+      time: "15 phút trước",
+      read: false,
+      icon: Zap,
+      color: "text-rose-500 bg-rose-500/10"
+    },
+    {
+      id: 3,
+      title: "🎉 Nhận +50 Điểm Danh Hôm Nay",
+      desc: "Bạn vừa hoàn thành chuỗi 5 ngày điểm danh liên tiếp.",
+      time: "Hôm nay, 08:30",
+      read: false,
+      icon: Sparkles,
+      color: "text-emerald-600 bg-emerald-500/10"
+    },
+    {
+      id: 4,
+      title: "🏆 Đạt 83% Tiến Trình Hạng Kim Cương",
+      desc: "Tích thêm +250 pt nữa để mở khóa đặc quyền X2 điểm.",
+      time: "Hôm qua",
+      read: true,
+      icon: Trophy,
+      color: "text-cyan-600 bg-cyan-500/10"
+    }
+  ];
+
+  const handleMarkAllRead = () => {
+    setUnreadCount(0);
+  };
 
   const NAV_LINKS = [
     { href: "/", label: "Trang Chủ" },
@@ -49,8 +96,77 @@ export function Navbar() {
           ))}
         </nav>
 
-        {/* Desktop Right Auth Section */}
-        <div className="hidden md:flex items-center gap-3">
+        {/* Desktop Right Auth & Notifications Section */}
+        <div className="hidden md:flex items-center gap-3 relative">
+          
+          {/* Notification Bell Button */}
+          <div className="relative">
+            <button
+              onClick={() => {
+                setShowNotifPopover(!showNotifPopover);
+                if (unreadCount > 0) setUnreadCount(0);
+              }}
+              title="Thông báo EcoValues"
+              className="p-2 rounded-full bg-secondary hover:bg-secondary/80 text-foreground border border-border transition-all relative active:scale-95"
+            >
+              <Bell className="w-4 h-4 text-emerald-600" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white text-[10px] font-black rounded-full flex items-center justify-center animate-pulse border-2 border-background">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+
+            {/* Notifications Popover Dropdown */}
+            {showNotifPopover && (
+              <div className="absolute right-0 mt-3 w-80 sm:w-96 bg-card border border-border rounded-3xl shadow-2xl p-4 z-50 space-y-3 animate-in fade-in slide-in-from-top-2">
+                <div className="flex items-center justify-between border-b border-border pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <Bell className="w-4 h-4 text-emerald-600" />
+                    <h4 className="font-extrabold text-sm text-foreground">Thông Báo Mới</h4>
+                  </div>
+                  <button 
+                    onClick={handleMarkAllRead} 
+                    className="text-[11px] font-bold text-emerald-600 hover:underline flex items-center gap-1"
+                  >
+                    <Check className="w-3 h-3" /> Đánh dấu đã đọc
+                  </button>
+                </div>
+
+                <div className="space-y-2 max-h-80 overflow-y-auto pr-1 scrollbar-thin">
+                  {notifications.map((n) => (
+                    <div 
+                      key={n.id} 
+                      className={`p-3 rounded-2xl border text-xs flex gap-3 transition-all ${
+                        !n.read ? 'bg-emerald-500/5 border-emerald-500/30' : 'bg-secondary/40 border-border opacity-75'
+                      }`}
+                    >
+                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${n.color}`}>
+                        <n.icon className="w-4 h-4" />
+                      </div>
+                      <div className="space-y-0.5 flex-1">
+                        <p className="font-bold text-foreground leading-snug">{n.title}</p>
+                        <p className="text-muted-foreground text-[11px]">{n.desc}</p>
+                        <span className="text-[10px] text-emerald-600 font-medium block pt-0.5">{n.time}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="pt-1 text-center border-t border-border">
+                  <Link 
+                    href="/ca-nhan" 
+                    onClick={() => setShowNotifPopover(false)}
+                    className="text-xs font-bold text-emerald-600 hover:underline block"
+                  >
+                    Xem lịch sử tài khoản ➔
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* User Profile Pill */}
           {isLoggedIn && user ? (
             <Link
               href="/ca-nhan"

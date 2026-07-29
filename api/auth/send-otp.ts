@@ -20,8 +20,8 @@ export default async function handler(req: any, res: any) {
 
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-    const smtpUser = process.env.GMAIL_USER || "quangdung6189@gmail.com";
-    const smtpPass = process.env.GMAIL_PASS || "oxlqgekhistqzlve";
+    const smtpUser = process.env.GMAIL_USER || "ecovalous@gmail.com";
+    const smtpPass = process.env.GMAIL_PASS || "cmwrnwajkmmprzpl";
 
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -62,7 +62,7 @@ export default async function handler(req: any, res: any) {
 
     return res.status(200).json({
       success: true,
-      message: 'Mã OTP đã được gửi trực tiếp về hòm thư Gmail của bạn!',
+      message: 'Mã OTP đã được gửi trực tiếp từ Gmail ecovalous@gmail.com!',
       code: otpCode
     });
   } catch (err: any) {
