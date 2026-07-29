@@ -11,7 +11,7 @@ export function Navbar() {
 
   const NAV_LINKS = [
     { href: "/", label: "Trang Chủ" },
-    { href: "/ban-do", label: "Bản Đồ Live" },
+    { href: "/ban-do", label: "Bản Đồ" },
     { href: "/giai-phap", label: "Giải Pháp" },
     { href: "/ke-hoach", label: "Kế Hoạch" },
     { href: "/tram-ho-tro", label: "Trạm Hỗ Trợ" },

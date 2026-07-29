@@ -569,19 +569,22 @@ export default function LiveMap() {
       const isSelected = selectedStationId === station.id;
       const isFull = station.capacity >= 85;
 
+      // Short name for compact marker display without overlap (e.g. "Trạm Thư Viện CS1" -> "Thư Viện")
+      const shortName = station.name.replace("Trạm ", "").replace(" CS1", "").replace(" CS2", "").replace(" Central", "");
+
       const markerHtml = `
         <div class="relative flex items-center justify-center cursor-pointer group">
-          ${isFull ? '<div class="absolute -inset-3 rounded-full bg-rose-500/50 animate-ping"></div>' : ''}
-          <div class="px-3 py-1.5 rounded-full font-black text-xs shadow-2xl flex items-center gap-1.5 transition-all transform group-hover:scale-125 ${
+          ${isFull ? '<div class="absolute -inset-2 rounded-full bg-rose-500/50 animate-ping"></div>' : ''}
+          <div class="px-2.5 py-1 rounded-full font-extrabold text-[11px] shadow-md flex items-center gap-1 transition-all transform group-hover:scale-110 group-hover:z-50 whitespace-nowrap ${
             isSelected 
-              ? 'bg-emerald-600 text-white ring-4 ring-emerald-400 scale-115 z-50' 
+              ? 'bg-emerald-600 text-white ring-4 ring-emerald-400/80 scale-105 z-50 shadow-emerald-500/40' 
               : isFull 
-              ? 'bg-rose-600 text-white border-2 border-white' 
-              : 'bg-emerald-700 text-white border-2 border-white'
+              ? 'bg-rose-600 text-white border border-white' 
+              : 'bg-emerald-800/90 text-white border border-white/80 backdrop-blur-sm'
           }">
-            <span class="w-2.5 h-2.5 rounded-full ${isFull ? 'bg-amber-300 animate-pulse' : 'bg-emerald-300'}"></span>
-            <span>${station.name}</span>
-            <span class="bg-black/40 px-1.5 py-0.5 rounded text-[10px] font-mono">${station.capacity}%</span>
+            <span class="w-2 h-2 rounded-full ${isFull ? 'bg-amber-300 animate-pulse' : 'bg-emerald-300'}"></span>
+            <span>${shortName}</span>
+            <span class="bg-black/35 px-1 py-0.2 rounded text-[10px] font-mono font-bold">${station.capacity}%</span>
           </div>
         </div>
       `;
@@ -589,8 +592,8 @@ export default function LiveMap() {
       const customIcon = L.divIcon({
         html: markerHtml,
         className: 'custom-leaflet-marker',
-        iconSize: [160, 40],
-        iconAnchor: [80, 20],
+        iconSize: [95, 26],
+        iconAnchor: [47, 13],
       });
 
       const marker = L.marker([station.lat, station.lng], { icon: customIcon }).addTo(map);
