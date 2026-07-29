@@ -107,14 +107,34 @@ export default function Profile() {
   const [notifEmail, setNotifEmail] = useState(true);
   const [notifPush, setNotifPush] = useState(true);
 
-  // Dynamic user session
-  const currentUser = user || {
-    name: "Đặng Quang Dũng",
-    email: "ecovalous@gmail.com",
-    studentId: "CMC-251156",
-    major: "Công nghệ Thông tin",
-    points: 550,
-  };
+  // Require Login Guard Screen
+  if (!isLoggedIn || !user) {
+    return (
+      <MainLayout>
+        <div className="min-h-[85vh] flex items-center justify-center p-4 bg-background">
+          <div className="bg-card border border-border p-8 rounded-3xl max-w-md w-full text-center space-y-6 shadow-2xl">
+            <div className="w-20 h-20 bg-emerald-500/10 text-emerald-600 rounded-full flex items-center justify-center mx-auto border border-emerald-500/20 shadow-inner">
+              <Lock className="w-10 h-10" />
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-black text-foreground">Yêu Cầu Đăng Nhập</h2>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Bạn chưa đăng nhập tài khoản EcoValues. Vui lòng đăng nhập hoặc tạo tài khoản mới để xem trang cá nhân, ví điểm thưởng và bảng tiến trình thăng cấp.
+              </p>
+            </div>
+            <Link
+              href="/tham-gia?mode=login"
+              className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-2xl shadow-lg inline-block transition-all active:scale-95"
+            >
+              🔑 Đăng Nhập / Đăng Ký Ngay ➔
+            </Link>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  const currentUser = user;
 
   // Handle Image Upload
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

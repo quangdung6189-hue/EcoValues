@@ -104,13 +104,13 @@ export function Navbar() {
             <button
               onClick={() => {
                 setShowNotifPopover(!showNotifPopover);
-                if (unreadCount > 0) setUnreadCount(0);
+                if (unreadCount > 0 && isLoggedIn) setUnreadCount(0);
               }}
               title="Thông báo EcoValues"
               className="p-2 rounded-full bg-secondary hover:bg-secondary/80 text-foreground border border-border transition-all relative active:scale-95"
             >
               <Bell className="w-4 h-4 text-emerald-600" />
-              {unreadCount > 0 && (
+              {isLoggedIn && unreadCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white text-[10px] font-black rounded-full flex items-center justify-center animate-pulse border-2 border-background">
                   {unreadCount}
                 </span>
@@ -125,43 +125,64 @@ export function Navbar() {
                     <Bell className="w-4 h-4 text-emerald-600" />
                     <h4 className="font-extrabold text-sm text-foreground">Thông Báo Mới</h4>
                   </div>
-                  <button 
-                    onClick={handleMarkAllRead} 
-                    className="text-[11px] font-bold text-emerald-600 hover:underline flex items-center gap-1"
-                  >
-                    <Check className="w-3 h-3" /> Đánh dấu đã đọc
-                  </button>
-                </div>
-
-                <div className="space-y-2 max-h-80 overflow-y-auto pr-1 scrollbar-thin">
-                  {notifications.map((n) => (
-                    <div 
-                      key={n.id} 
-                      className={`p-3 rounded-2xl border text-xs flex gap-3 transition-all ${
-                        !n.read ? 'bg-emerald-500/5 border-emerald-500/30' : 'bg-secondary/40 border-border opacity-75'
-                      }`}
+                  {isLoggedIn && (
+                    <button 
+                      onClick={handleMarkAllRead} 
+                      className="text-[11px] font-bold text-emerald-600 hover:underline flex items-center gap-1"
                     >
-                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${n.color}`}>
-                        <n.icon className="w-4 h-4" />
-                      </div>
-                      <div className="space-y-0.5 flex-1">
-                        <p className="font-bold text-foreground leading-snug">{n.title}</p>
-                        <p className="text-muted-foreground text-[11px]">{n.desc}</p>
-                        <span className="text-[10px] text-emerald-600 font-medium block pt-0.5">{n.time}</span>
-                      </div>
-                    </div>
-                  ))}
+                      <Check className="w-3 h-3" /> Đánh dấu đã đọc
+                    </button>
+                  )}
                 </div>
 
-                <div className="pt-1 text-center border-t border-border">
-                  <Link 
-                    href="/ca-nhan" 
-                    onClick={() => setShowNotifPopover(false)}
-                    className="text-xs font-bold text-emerald-600 hover:underline block"
-                  >
-                    Xem lịch sử tài khoản ➔
-                  </Link>
-                </div>
+                {isLoggedIn && user ? (
+                  <>
+                    <div className="space-y-2 max-h-80 overflow-y-auto pr-1 scrollbar-thin">
+                      {notifications.map((n) => (
+                        <div 
+                          key={n.id} 
+                          className={`p-3 rounded-2xl border text-xs flex gap-3 transition-all ${
+                            !n.read ? 'bg-emerald-500/5 border-emerald-500/30' : 'bg-secondary/40 border-border opacity-75'
+                          }`}
+                        >
+                          <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${n.color}`}>
+                            <n.icon className="w-4 h-4" />
+                          </div>
+                          <div className="space-y-0.5 flex-1">
+                            <p className="font-bold text-foreground leading-snug">{n.title}</p>
+                            <p className="text-muted-foreground text-[11px]">{n.desc}</p>
+                            <span className="text-[10px] text-emerald-600 font-medium block pt-0.5">{n.time}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="pt-1 text-center border-t border-border">
+                      <Link 
+                        href="/ca-nhan" 
+                        onClick={() => setShowNotifPopover(false)}
+                        className="text-xs font-bold text-emerald-600 hover:underline block"
+                      >
+                        Xem lịch sử tài khoản ➔
+                      </Link>
+                    </div>
+                  </>
+                ) : (
+                  <div className="p-4 text-center space-y-3">
+                    <div className="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center mx-auto">
+                      <Lock className="w-5 h-5" />
+                    </div>
+                    <p className="text-xs font-bold text-foreground">Bạn chưa đăng nhập tài khoản</p>
+                    <p className="text-[11px] text-muted-foreground">Đăng nhập để nhận thông báo tích điểm, sự kiện và ưu đãi cá nhân.</p>
+                    <Link 
+                      href="/tham-gia?mode=login"
+                      onClick={() => setShowNotifPopover(false)}
+                      className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow block text-center transition-all active:scale-95"
+                    >
+                      🔑 Đăng Nhập Ngay ➔
+                    </Link>
+                  </div>
+                )}
               </div>
             )}
           </div>
