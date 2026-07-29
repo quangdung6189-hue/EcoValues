@@ -21,18 +21,24 @@ import {
   User,
   Hash,
   Check,
-  RotateCcw
+  RotateCcw,
+  LogIn,
+  UserPlus
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function Join() {
   const { toast } = useToast();
-  const [_, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { login } = useAuth();
 
+  // Read URL query params (e.g. /tham-gia?mode=login)
+  const queryParams = new URLSearchParams(window.location.search);
+  const initialMode = queryParams.get("mode") === "register" ? "register" : "login";
+
   // Switch mode toggle
-  const [authMode, setAuthMode] = useState<"register" | "login">("login");
+  const [authMode, setAuthMode] = useState<"register" | "login">(initialMode);
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -104,7 +110,7 @@ export default function Join() {
   const [age, setAge] = useState(20);
   const [school, setSchool] = useState("Đại học CMC");
   
-  const [role, setRole] = useState("Tình nguyện viên"); // "Tình nguyện viên" | "Đối tác xử lý/tái chế" | "Nhà tài trợ"
+  const [role, setRole] = useState("Tình nguyện viên");
   const [major, setMajor] = useState("Công nghệ Thông tin");
   const [password, setPassword] = useState("");
   const [note, setNote] = useState("");
@@ -127,7 +133,7 @@ export default function Join() {
     return () => clearInterval(timer);
   }, [resendTimer]);
 
-  // Send real dynamic OTP email via server Ethereal relay with graceful fallback
+  // Send real dynamic OTP email
   const handleSendOtp = async () => {
     if (!email.includes("@")) {
       toast({
@@ -162,11 +168,8 @@ export default function Join() {
             success = true;
           }
         }
-      } catch (e) {
-        // Fetch failed due to network / backend server offline
-      }
+      } catch (e) {}
 
-      // If backend was offline or failed, generate local fallback OTP
       if (!success || !code) {
         code = Math.floor(100000 + Math.random() * 900000).toString();
       }
@@ -175,7 +178,6 @@ export default function Join() {
       setPreviewEmailUrl(previewUrl);
       setIsOtpSent(true);
 
-      // SECURE TOAST: NEVER REVEALS OTP DIGITS
       toast({
         title: "Đã Gửi Mã OTP Xác Thực! 📨",
         description: `Hệ thống đã gửi mã OTP 6 số về hòm thư Gmail ${email}. Vui lòng kiểm tra Hộp thư đến.`,
@@ -193,7 +195,7 @@ export default function Join() {
     }
   };
 
-  // Final submit (combined registration & volunteer registration)
+  // Final submit
   const handleFinalSubmit = async () => {
     if (authOtpInput.trim() !== sentOtpCode.trim()) {
       toast({
@@ -208,7 +210,6 @@ export default function Join() {
     const studentId = `CMC-${Math.floor(100000 + Math.random() * 900000)}`;
 
     try {
-      // 1. Submit Join registration API (Fail-safe)
       try {
         await fetch('/api/join', {
           method: 'POST',
@@ -217,7 +218,6 @@ export default function Join() {
         });
       } catch (e) {}
 
-      // 2. Submit User Account Registration API (Fail-safe)
       try {
         await fetch('/api/auth/register', {
           method: 'POST',
@@ -231,7 +231,6 @@ export default function Join() {
         });
       } catch (e) {}
 
-      // 3. Log user in on Frontend Auth Context (Always succeeds)
       const loggedUser = login(fullName, email, studentId, major, 2450);
 
       toast({
@@ -239,10 +238,8 @@ export default function Join() {
         description: `Chào mừng ${loggedUser.name} đã gia nhập Đại Sứ Xanh EcoValues (+2450 điểm thưởng ban đầu).`,
       });
 
-      // Navigate to points page
       setLocation("/tich-diem");
     } catch (err: any) {
-      // Fallback auth login
       login(fullName, email, studentId, major, 2450);
       setLocation("/tich-diem");
     } finally {
@@ -276,7 +273,7 @@ export default function Join() {
                 </h1>
                 
                 <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-                  Đăng ký tham gia ngay hôm nay để nhận tài khoản thành viên, tích lũy Điểm Xanh đổi quà tặng thân thiện môi trường và nhận giấy chứng nhận hoạt động xã hội!
+                  Đăng ký hoặc đăng nhập tài khoản để tích lũy Điểm Xanh đổi quà tặng thân thiện môi trường và tham gia các chiến dịch xanh tại CMC!
                 </p>
 
                 <div className="grid grid-cols-1 gap-4 pt-2">
@@ -299,7 +296,7 @@ export default function Join() {
               </motion.div>
             </div>
 
-            {/* Right Col: Combined 3-Step Symmetrical Register Form */}
+            {/* Right Col: Dual Auth Card (Login & Register) */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -308,28 +305,33 @@ export default function Join() {
               <div className="bg-card border border-border rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-hidden space-y-6">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-bl-full pointer-events-none"></div>
 
-                {/* Switch mode tabs */}
-                <div className="flex bg-secondary p-1 rounded-2xl border border-border relative z-10">
+                {/* Symmetrical Dual-Tab Switcher */}
+                <div className="flex bg-secondary/80 p-1.5 rounded-2xl border border-border/80 relative z-10 shadow-inner">
                   <button
                     type="button"
                     onClick={() => setAuthMode("login")}
-                    className={`flex-1 py-2.5 rounded-xl text-xs font-black transition-all ${
-                      authMode === "login" ? "bg-card text-emerald-600 shadow" : "text-muted-foreground hover:text-foreground"
+                    className={`flex-1 py-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 ${
+                      authMode === "login" 
+                        ? "bg-card text-emerald-600 shadow-md border border-emerald-500/20" 
+                        : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
-                    🔑 ĐĂNG NHẬP
+                    <LogIn className="w-4 h-4 text-emerald-600" /> 🔑 ĐĂNG NHẬP
                   </button>
                   <button
                     type="button"
                     onClick={() => setAuthMode("register")}
-                    className={`flex-1 py-2.5 rounded-xl text-xs font-black transition-all ${
-                      authMode === "register" ? "bg-card text-emerald-600 shadow" : "text-muted-foreground hover:text-foreground"
+                    className={`flex-1 py-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 ${
+                      authMode === "register" 
+                        ? "bg-card text-emerald-600 shadow-md border border-emerald-500/20" 
+                        : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
-                    📝 ĐĂNG KÝ MỚI
+                    <UserPlus className="w-4 h-4 text-emerald-600" /> 📝 ĐĂNG KÝ MỚI
                   </button>
                 </div>
 
+                {/* Form Content */}
                 {authMode === "login" ? (
                   <motion.form 
                     onSubmit={handleLoginSubmit} 
@@ -338,8 +340,8 @@ export default function Join() {
                     className="space-y-4 pt-2 relative z-10"
                   >
                     <div className="text-center space-y-1">
-                      <h2 className="text-xl font-black text-foreground font-sans">Đăng Nhập Thành Viên</h2>
-                      <p className="text-[11px] text-muted-foreground">Nhập tài khoản để tích điểm xanh & đổi voucher</p>
+                      <h2 className="text-xl md:text-2xl font-black text-foreground font-sans">Đăng Nhập Thành Viên</h2>
+                      <p className="text-[11px] text-muted-foreground">Nhập tài khoản để tích điểm xanh & đổi quà tặng</p>
                     </div>
 
                     <div className="space-y-1.5">
@@ -378,9 +380,18 @@ export default function Join() {
                       {isLoggingIn ? "Đang xử lý..." : "Đăng Nhập Ngay ➔"}
                     </button>
 
-                    <p className="text-center text-[10px] text-muted-foreground pt-1">
-                      💡 Chưa có tài khoản? Nhấp tab <strong>ĐĂNG KÝ MỚI</strong> ở trên!
-                    </p>
+                    <div className="pt-3 border-t border-border/60 text-center">
+                      <p className="text-xs text-muted-foreground">
+                        Bạn chưa có tài khoản EcoValues?{" "}
+                        <button
+                          type="button"
+                          onClick={() => setAuthMode("register")}
+                          className="font-extrabold text-emerald-600 hover:underline inline-flex items-center gap-1"
+                        >
+                          Tạo tài khoản đăng ký mới ngay ➔
+                        </button>
+                      </p>
+                    </div>
                   </motion.form>
                 ) : (
                   <>
@@ -392,16 +403,12 @@ export default function Join() {
 
                     {/* Symmetrical Premium Stepper Pipeline */}
                     <div className="relative w-full max-w-sm mx-auto py-2 z-10 px-4">
-                      {/* Background line */}
                       <div className="absolute top-[26px] left-8 right-8 h-0.5 bg-border z-0" />
-                      
-                      {/* Active progress line */}
                       <div 
                         className="absolute top-[26px] left-8 h-0.5 bg-emerald-600 transition-all duration-500 z-0"
                         style={{ width: `calc(${((authStep - 1) / 2)} * (100% - 64px))` }}
                       />
 
-                      {/* Symmetrical step nodes */}
                       <div className="relative flex justify-between z-10">
                         {[
                           { step: 1, label: "Liên Hệ" },
@@ -727,9 +734,18 @@ export default function Join() {
                       </motion.div>
                     )}
 
-                    <p className="text-center text-[10px] text-muted-foreground mt-4">
-                      Đăng ký xong tài khoản sẽ được đăng nhập tự động để bắt đầu tích điểm.
-                    </p>
+                    <div className="pt-3 border-t border-border/60 text-center">
+                      <p className="text-xs text-muted-foreground">
+                        Bạn đã có tài khoản EcoValues?{" "}
+                        <button
+                          type="button"
+                          onClick={() => setAuthMode("login")}
+                          className="font-extrabold text-emerald-600 hover:underline inline-flex items-center gap-1"
+                        >
+                          Chuyển sang đăng nhập ngay ➔
+                        </button>
+                      </p>
+                    </div>
                   </>
                 )}
               </div>
