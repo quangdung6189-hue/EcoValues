@@ -368,6 +368,26 @@ class MemStorage {
     return this.registrations;
   }
 
+  async getRegistrationsFromSupabase(): Promise<Registration[]> {
+    try {
+      const { data, error } = await supabase.from('registrations').select('*').order('createdAt', { ascending: false });
+      if (!error && data && data.length > 0) {
+        return data.map((item: any) => ({
+          id: item.id || `REG-${Date.now()}`,
+          fullName: item.fullName || item.full_name || '',
+          email: item.email || '',
+          phone: item.phone || '',
+          role: item.role || 'Tình nguyện viên',
+          note: item.note || '',
+          createdAt: item.createdAt || item.created_at || new Date().toISOString()
+        }));
+      }
+    } catch (e) {
+      console.warn('⚠️ Không thể đọc Supabase registrations, sử dụng bộ nhớ tạm:', e);
+    }
+    return this.registrations;
+  }
+
   registerUser(name: string, email: string, studentId: string, major: string) {
     let existing = this.leaderboard.find(u => u.name.toLowerCase() === name.toLowerCase());
     if (!existing) {

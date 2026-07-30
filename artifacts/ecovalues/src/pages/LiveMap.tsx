@@ -777,7 +777,7 @@ export default function LiveMap() {
                 <MapPin className="w-5 h-5 text-emerald-600" />
               </div>
               <p className="text-3xl font-black font-mono text-foreground">{localStations.length} Trạm</p>
-              <p className="text-xs text-emerald-600 font-bold">✓ CS2: 3 trạm | CS1: 3 trạm</p>
+              <p className="text-xs text-emerald-600 font-bold">✓ CS2: 2 trạm | CS1: 1 trạm</p>
             </div>
 
             <div className="bg-card border border-border p-6 rounded-3xl shadow-sm space-y-2 hover:border-emerald-500/40 transition-all">

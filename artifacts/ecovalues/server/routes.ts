@@ -106,6 +106,20 @@ export function registerRoutes(app: Express) {
     }
   });
 
+  // Query All Registrations List
+  app.get('/api/registrations', async (_req: Request, res: Response) => {
+    try {
+      const list = await storage.getRegistrationsFromSupabase();
+      res.json({
+        success: true,
+        total: list.length,
+        registrations: list
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // User auth endpoints
   app.post('/api/auth/register', (req: Request, res: Response) => {
     try {

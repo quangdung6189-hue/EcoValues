@@ -84,7 +84,7 @@ export function Navbar() {
       {
         id: 3,
         title: "⚡ Trạm Thu Gom CS1 & CS2 Đã Hoạt Động",
-        desc: "14 trạm phân loại rác thông minh sẵn sàng tiếp nhận tích điểm.",
+        desc: "3 trạm phân loại rác thông minh sẵn sàng tiếp nhận tích điểm.",
         time: "Hôm nay",
         read: false,
         icon: Zap,

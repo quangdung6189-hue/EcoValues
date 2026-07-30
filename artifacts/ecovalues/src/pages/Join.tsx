@@ -365,14 +365,14 @@ export default function Join() {
                   Tích Điểm Xanh & Đóng Góp Hành Động Bền Vững
                 </h1>
                 <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-                  Tạo tài khoản thành viên để bắt đầu tích lũy điểm thưởng từ Hạng Đồng 🥉, phân loại rác thông minh tại 14 trạm CMC và đổi quà tặng hấp dẫn.
+                  Tạo tài khoản thành viên để bắt đầu tích lũy điểm thưởng từ Hạng Đồng 🥉, phân loại rác thông minh tại 3 trạm CMC và đổi quà tặng hấp dẫn.
                 </p>
               </motion.div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
                 {[
                   { title: "Hạng Đồng (Bronze)", desc: "Khởi đầu với +100 pt khi tạo tài khoản", icon: Award, color: "text-amber-600 bg-amber-500/10" },
-                  { title: "Phân Loại AI", desc: "Tích điểm tự động 24/7 tại 14 trạm trọ", icon: Zap, color: "text-emerald-600 bg-emerald-500/10" },
+                  { title: "Phân Loại AI", desc: "Tích điểm tự động 24/7 tại 3 trạm CMC", icon: Zap, color: "text-emerald-600 bg-emerald-500/10" },
                   { title: "Đổi Quà Độc Quyền", desc: "Voucher Highlands, quà xanh & áo thun", icon: Gift, color: "text-cyan-600 bg-cyan-500/10" }
                 ].map((item, idx) => (
                   <div key={idx} className="p-4 bg-card border border-border rounded-2xl space-y-2 shadow-sm">

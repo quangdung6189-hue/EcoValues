@@ -31,13 +31,13 @@ const PROCESS_STEPS = [
     badge: "Bước 1 - Phân loại",
     color: "from-emerald-500 to-green-600",
     bgColor: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-    desc: "14 Trạm thu gom thông minh phủ sóng 2 cơ sở (Duy Tân & Hà Đông). Rác được cảm biến phân loại chính xác thành 4 dòng rác riêng biệt.",
+    desc: "3 Trạm thu gom thông minh phủ sóng 2 cơ sở (Duy Tân & Hà Đông). Rác được cảm biến phân loại chính xác thành 4 dòng rác riêng biệt.",
     details: [
       "Tích +20 điểm xanh tức thì khi phân loại chai nhựa/lon nhôm",
       "Phân tách riêng rác điện tử nguy hại (pin, dây cáp cũ)",
       "Màn hình OLED và cảm biến trọng lượng đo độ chính xác 96%"
     ],
-    metric: "14 Trạm Phủ Sóng",
+    metric: "3 Trạm Phủ Sóng",
     submetric: "Cơ sở 1 & Cơ sở 2"
   },
   {
